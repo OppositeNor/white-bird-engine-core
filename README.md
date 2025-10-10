@@ -6,6 +6,8 @@
 
 - [简体中文](./README.zh-Hans.md)
 
+This is the repository for the core layer of White Bird Engine. The full engine is still under development.
+
 ## How to build
 
 Clone the repository:
