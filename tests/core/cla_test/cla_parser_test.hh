@@ -18,7 +18,7 @@
 #include "core/cla/cla_parser.hh"
 #include "core/cla/cla_ast.hh"
 #include "core/cla/cla_ast_visitor.hh"
-#include "core/engine_core.hh"
+#include "global/global.hh"
 #include <gtest/gtest.h>
 #include <vector>
 #include <string>
@@ -26,7 +26,7 @@
 namespace WBE = WhiteBirdEngine;
 
 TEST(CLAParser, BasicUtilityOnly) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"test_utility", WBE::CLAToken::Type::UTILITY_NAME}
@@ -44,7 +44,7 @@ TEST(CLAParser, BasicUtilityOnly) {
 }
 
 TEST(CLAParser, UtilityWithSingleRootOperand) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"test_utility", WBE::CLAToken::Type::UTILITY_NAME},
@@ -65,7 +65,7 @@ TEST(CLAParser, UtilityWithSingleRootOperand) {
 }
 
 TEST(CLAParser, UtilityWithLongOptionOnly) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"test_utility", WBE::CLAToken::Type::UTILITY_NAME},
@@ -86,7 +86,7 @@ TEST(CLAParser, UtilityWithLongOptionOnly) {
 }
 
 TEST(CLAParser, UtilityWithShortOptionOnly) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"test_utility", WBE::CLAToken::Type::UTILITY_NAME},
@@ -107,7 +107,7 @@ TEST(CLAParser, UtilityWithShortOptionOnly) {
 }
 
 TEST(CLAParser, LongOptionWithArgument) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"compiler", WBE::CLAToken::Type::UTILITY_NAME},
@@ -131,7 +131,7 @@ TEST(CLAParser, LongOptionWithArgument) {
 }
 
 TEST(CLAParser, ShortOptionWithArgument) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"logger", WBE::CLAToken::Type::UTILITY_NAME},
@@ -155,7 +155,7 @@ TEST(CLAParser, ShortOptionWithArgument) {
 }
 
 TEST(CLAParser, OptionWithMultipleArguments) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"compiler", WBE::CLAToken::Type::UTILITY_NAME},
@@ -181,7 +181,7 @@ TEST(CLAParser, OptionWithMultipleArguments) {
 }
 
 TEST(CLAParser, MultipleOperationsAndOperands) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"gcc", WBE::CLAToken::Type::UTILITY_NAME},
@@ -214,7 +214,7 @@ TEST(CLAParser, MultipleOperationsAndOperands) {
 }
 
 TEST(CLAParser, MixedRootOperandsAndOptions) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"processor", WBE::CLAToken::Type::UTILITY_NAME},
@@ -244,7 +244,7 @@ TEST(CLAParser, MixedRootOperandsAndOptions) {
 }
 
 TEST(CLAParser, ComplexRealWorldExample) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"g++", WBE::CLAToken::Type::UTILITY_NAME},
@@ -291,7 +291,7 @@ TEST(CLAParser, ComplexRealWorldExample) {
 }
 
 TEST(CLAParser, ConsecutiveOptions) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"utility", WBE::CLAToken::Type::UTILITY_NAME},
@@ -318,7 +318,7 @@ TEST(CLAParser, ConsecutiveOptions) {
 }
 
 TEST(CLAParser, ErrorInvalidFirstToken) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"--invalid", WBE::CLAToken::Type::OPTION_LONG}
@@ -329,7 +329,7 @@ TEST(CLAParser, ErrorInvalidFirstToken) {
 }
 
 TEST(CLAParser, ErrorInvalidTokenInRootOperand) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"utility", WBE::CLAToken::Type::UTILITY_NAME},
@@ -341,7 +341,7 @@ TEST(CLAParser, ErrorInvalidTokenInRootOperand) {
 }
 
 TEST(CLAParser, OptionsWithNoArgumentsFollowedByMoreOptions) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"test", WBE::CLAToken::Type::UTILITY_NAME},
@@ -369,7 +369,7 @@ TEST(CLAParser, OptionsWithNoArgumentsFollowedByMoreOptions) {
 }
 
 TEST(CLAParser, SingleRootOperandOnly) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"cat", WBE::CLAToken::Type::UTILITY_NAME},
@@ -390,7 +390,7 @@ TEST(CLAParser, SingleRootOperandOnly) {
 }
 
 TEST(CLAParser, MultipleRootOperands) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
 
     std::vector<WBE::CLAToken> tokens = {
         {"concat", WBE::CLAToken::Type::UTILITY_NAME},
@@ -416,7 +416,7 @@ TEST(CLAParser, MultipleRootOperands) {
 
 TEST(CLAParser, MultipleShortOptionsInOnePrefix) {
     // Test multiple short options in one '-' prefix (like -abc)
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     std::vector<WBE::CLAToken> tokens = {
         {"tool", WBE::CLAToken::Type::UTILITY_NAME},
@@ -440,7 +440,7 @@ TEST(CLAParser, MultipleShortOptionsInOnePrefix) {
 
 TEST(CLAParser, SingleShortOptionWithArgument) {
     // Test single short option can take arguments
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     std::vector<WBE::CLAToken> tokens = {
         {"tool", WBE::CLAToken::Type::UTILITY_NAME},
@@ -465,7 +465,7 @@ TEST(CLAParser, SingleShortOptionWithArgument) {
 
 TEST(CLAParser, MultipleShortOptionsFollowedByLongOption) {
     // Test multiple short options followed by long option with argument
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     std::vector<WBE::CLAToken> tokens = {
         {"compiler", WBE::CLAToken::Type::UTILITY_NAME},
@@ -493,7 +493,7 @@ TEST(CLAParser, MultipleShortOptionsFollowedByLongOption) {
 
 TEST(CLAParser, MixedSingleAndMultipleShortOptions) {
     // Test mixing single short options (with args) and multiple short options (no args)
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     std::vector<WBE::CLAToken> tokens = {
         {"tool", WBE::CLAToken::Type::UTILITY_NAME},
@@ -527,7 +527,7 @@ TEST(CLAParser, MixedSingleAndMultipleShortOptions) {
 
 TEST(CLAParser, MultipleShortOptionsWithOperands) {
     // Test multiple short options followed by root operands
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     std::vector<WBE::CLAToken> tokens = {
         {"ls", WBE::CLAToken::Type::UTILITY_NAME},

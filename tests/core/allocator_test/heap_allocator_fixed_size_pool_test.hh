@@ -16,7 +16,7 @@
 #define __WBE_ALLOCATOR_FIXED_SIZE_POOL_TEST_HH__
 
 #include "core/allocator/heap_allocator_fixed_size_pool.hh"
-#include "core/engine_core.hh"
+#include "global/global.hh"
 #include <cstddef>
 #include <gtest/gtest.h>
 
@@ -31,7 +31,6 @@ TEST(WBEAllocFSPTest, Trait) {
 }
 
 TEST(WBEAllocFSPTest, ToString) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
     WBE::HeapAllocatorFixedSizePool pool(4, 64);
 
     std::string exp_1 = "{\"type\":\"HeapAllocatorFixedSizePool\",\"size\":4,\"obj_count\":0,\"max_obj\":64,\"allocated\":[]}";
@@ -97,7 +96,7 @@ void test_continuous(WBE::HeapAllocatorFixedSizePool& p_pool, WBE::MemID p_mems[
 }
 
 TEST(WBEAllocFSPTest, MemContinuity) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     WBE::HeapAllocatorFixedSizePool pool(16, 64);
     WBE::MemID mems[4];
     mems[0] = pool.allocate();

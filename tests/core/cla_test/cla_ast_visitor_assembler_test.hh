@@ -17,8 +17,8 @@
 
 #include "core/cla/cla_ast.hh"
 #include "core/cla/cla_ast_visitor.hh"
-#include "core/engine_core.hh"
 #include "core/memory/reference_strong.hh"
+#include "global/global.hh"
 #include <gtest/gtest.h>
 #include <vector>
 #include <string>
@@ -27,7 +27,7 @@
 namespace WBE = WhiteBirdEngine;
 
 TEST(CLAASTVisitorAssembler, EmptyUtility) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::vector<WBE::Ref<WBE::CLAASTNode>> operations;
     auto root = WBE::make_ref<WBE::CLAASTNodeRoot>(WBE::global_allocator(), "test_utility", std::move(operations));
 
@@ -41,7 +41,7 @@ TEST(CLAASTVisitorAssembler, EmptyUtility) {
 }
 
 TEST(CLAASTVisitorAssembler, OnlyOperands) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::vector<WBE::Ref<WBE::CLAASTNode>> operations;
     operations.push_back(WBE::make_ref<WBE::CLAASTNodeRootOperand>(WBE::global_allocator(), "file1.txt"));
     operations.push_back(WBE::make_ref<WBE::CLAASTNodeRootOperand>(WBE::global_allocator(), "file2.txt"));
@@ -60,7 +60,7 @@ TEST(CLAASTVisitorAssembler, OnlyOperands) {
 }
 
 TEST(CLAASTVisitorAssembler, OperationWithExactArguments) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("output", 1);
@@ -83,7 +83,7 @@ TEST(CLAASTVisitorAssembler, OperationWithExactArguments) {
 }
 
 TEST(CLAASTVisitorAssembler, OperationWithExcessArguments) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("format", 1);
@@ -109,7 +109,7 @@ TEST(CLAASTVisitorAssembler, OperationWithExcessArguments) {
 }
 
 TEST(CLAASTVisitorAssembler, OperationWithZeroArguments) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("help", 0);
@@ -130,7 +130,7 @@ TEST(CLAASTVisitorAssembler, OperationWithZeroArguments) {
 }
 
 TEST(CLAASTVisitorAssembler, OperationWithInsufficientArguments) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("include", 2);
@@ -147,7 +147,7 @@ TEST(CLAASTVisitorAssembler, OperationWithInsufficientArguments) {
 }
 
 TEST(CLAASTVisitorAssembler, ShortOptionNames) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("output", 'o', 1);
@@ -170,7 +170,7 @@ TEST(CLAASTVisitorAssembler, ShortOptionNames) {
 }
 
 TEST(CLAASTVisitorAssembler, MultipleOperations) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("verbose", 0);
@@ -210,7 +210,7 @@ TEST(CLAASTVisitorAssembler, MultipleOperations) {
 }
 
 TEST(CLAASTVisitorAssembler, MixedOperandsAndOperations) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("output", 1);
@@ -254,7 +254,7 @@ TEST(CLAASTVisitorAssembler, MixedOperandsAndOperations) {
 }
 
 TEST(CLAASTVisitorAssembler, UnregisteredOperation) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("known", 1);
@@ -281,7 +281,7 @@ TEST(CLAASTVisitorAssembler, UnregisteredOperation) {
 }
 
 TEST(CLAASTVisitorAssembler, UnregisteredShortOption) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("output", 'o', 1);
@@ -308,7 +308,7 @@ TEST(CLAASTVisitorAssembler, UnregisteredShortOption) {
 }
 
 TEST(CLAASTVisitorAssembler, InsufficientArgumentsErrorMessage) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("complex", 3);
@@ -334,7 +334,7 @@ TEST(CLAASTVisitorAssembler, InsufficientArgumentsErrorMessage) {
 }
 
 TEST(CLAASTVisitorAssembler, ComplexRealWorldScenario) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WBE::CLAASTVisitorAssembler assembler;
     assembler.register_option("output", 'o', 1);

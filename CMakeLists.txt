@@ -89,6 +89,7 @@ set(libs ${libs}
 # Add engine source
 add_subdirectory(src/platform)
 add_subdirectory(src/core)
+add_subdirectory(src/global)
 
 add_library(WhiteBirdEngine::Platform ALIAS WBE_PLATFORM)
 add_library(WhiteBirdEngine::Core ALIAS WBE_CORE)

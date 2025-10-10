@@ -23,7 +23,7 @@ add_executable(${TEST_NAME}
 )
 
 target_link_libraries(${TEST_NAME}
-    WBE_CORE
+    WBE_GLOBAL
     gtest_main
 )
 

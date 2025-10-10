@@ -15,9 +15,9 @@
 #ifndef __WBE_LOGGING_MANAGER_TEST_HH__
 #define __WBE_LOGGING_MANAGER_TEST_HH__
 
-#include "core/engine_core.hh"
 #include "core/logging/log.hh"
 #include "core/logging/logging_manager.hh"
+#include "global/global.hh"
 #include "utils/defs.hh"
 #include "utils/utils.hh"
 #include <gtest/gtest.h>
@@ -68,7 +68,7 @@ public:
 };
 
 TEST(WBELoggingManagerTest, GetLogConstructDestruct) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::stringstream ss;
     {
         WBE::LoggingManager<LogTestMock, std::ostream> logging_manager(ss);

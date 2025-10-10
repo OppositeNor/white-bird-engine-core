@@ -17,8 +17,8 @@
 
 #include "core/cla/cla_ast.hh"
 #include "core/cla/cla_ast_visitor.hh"
-#include "core/engine_core.hh"
 #include "core/memory/reference_strong.hh"
+#include "global/global.hh"
 #include <gtest/gtest.h>
 #include <vector>
 #include <string>
@@ -26,7 +26,7 @@
 namespace WBE = WhiteBirdEngine;
 
 TEST(CLAASTVisitorToString, EmptyUtility) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::vector<WBE::Ref<WBE::CLAASTNode>> operations;
     auto root = WBE::make_ref<WBE::CLAASTNodeRoot>(WBE::global_allocator(), "test_utility", std::move(operations));
 
@@ -38,7 +38,7 @@ TEST(CLAASTVisitorToString, EmptyUtility) {
 }
 
 TEST(CLAASTVisitorToString, UtilityWithSingleOperand) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::vector<WBE::Ref<WBE::CLAASTNode>> operations;
     operations.push_back(WBE::make_ref<WBE::CLAASTNodeRootOperand>(WBE::global_allocator(), "input_file"));
 
@@ -54,7 +54,7 @@ TEST(CLAASTVisitorToString, UtilityWithSingleOperand) {
 }
 
 TEST(CLAASTVisitorToString, UtilityWithSingleOperation) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::vector<WBE::Ref<WBE::CLAASTNode>> operations;
     operations.push_back(WBE::make_ref<WBE::CLAASTNodeOperation>(WBE::global_allocator(), "help", false));
 
@@ -70,7 +70,7 @@ TEST(CLAASTVisitorToString, UtilityWithSingleOperation) {
 }
 
 TEST(CLAASTVisitorToString, UtilityWithOperationAndArguments) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::vector<std::string> arguments = {"output.txt", "verbose"};
     std::vector<WBE::Ref<WBE::CLAASTNode>> operations;
     operations.push_back(WBE::make_ref<WBE::CLAASTNodeOperation>(WBE::global_allocator(), "output", std::move(arguments), false));
@@ -90,7 +90,7 @@ TEST(CLAASTVisitorToString, UtilityWithOperationAndArguments) {
 }
 
 TEST(CLAASTVisitorToString, UtilityWithMultipleOperations) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::vector<WBE::Ref<WBE::CLAASTNode>> operations;
 
     operations.push_back(WBE::make_ref<WBE::CLAASTNodeRootOperand>(WBE::global_allocator(), "input.txt"));
@@ -115,7 +115,7 @@ TEST(CLAASTVisitorToString, UtilityWithMultipleOperations) {
 }
 
 TEST(CLAASTVisitorToString, OperationWithSingleArgument) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::vector<std::string> arguments = {"debug"};
     std::vector<WBE::Ref<WBE::CLAASTNode>> operations;
     operations.push_back(WBE::make_ref<WBE::CLAASTNodeOperation>(WBE::global_allocator(), "level", std::move(arguments), false));
@@ -134,7 +134,7 @@ TEST(CLAASTVisitorToString, OperationWithSingleArgument) {
 }
 
 TEST(CLAASTVisitorToString, ComplexUtilityExample) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::vector<WBE::Ref<WBE::CLAASTNode>> operations;
 
     operations.push_back(WBE::make_ref<WBE::CLAASTNodeRootOperand>(WBE::global_allocator(), "source.cpp"));
@@ -167,7 +167,7 @@ TEST(CLAASTVisitorToString, ComplexUtilityExample) {
 }
 
 TEST(CLAASTVisitorToString, MultipleOperands) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     std::vector<WBE::Ref<WBE::CLAASTNode>> operations;
     operations.push_back(WBE::make_ref<WBE::CLAASTNodeRootOperand>(WBE::global_allocator(), "file1.txt"));
     operations.push_back(WBE::make_ref<WBE::CLAASTNodeRootOperand>(WBE::global_allocator(), "file2.txt"));
@@ -187,7 +187,7 @@ TEST(CLAASTVisitorToString, MultipleOperands) {
 }
 
 TEST(CLAASTVisitorToString, OperationArgumentManipulation) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     auto operation = WBE::make_ref<WBE::CLAASTNodeOperation>(WBE::global_allocator(), "include", false);
     operation->push_argument("/usr/local/include");
     operation->push_argument("/opt/local/include");
@@ -210,7 +210,7 @@ TEST(CLAASTVisitorToString, OperationArgumentManipulation) {
 }
 
 TEST(CLAASTVisitor, MultipleShortOptionsYAMLFormat) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     auto op_a = WBE::make_ref<WBE::CLAASTNodeOperation>(WBE::global_allocator(), "a", true);
     auto op_b = WBE::make_ref<WBE::CLAASTNodeOperation>(WBE::global_allocator(), "b", true);
@@ -235,7 +235,7 @@ TEST(CLAASTVisitor, MultipleShortOptionsYAMLFormat) {
 }
 
 TEST(CLAASTVisitor, MixedSingleAndMultipleShortOptionsYAMLFormat) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     auto op_f = WBE::make_ref<WBE::CLAASTNodeOperation>(WBE::global_allocator(), "-f", true);
     op_f->push_argument("input.txt");

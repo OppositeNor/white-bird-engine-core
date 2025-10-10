@@ -16,7 +16,7 @@
 #define __WBE_ALOCATOR_POOL_TEST_HH__
 
 #include "core/allocator/heap_allocator_pool.hh"
-#include "core/engine_core.hh"
+#include "global/global.hh"
 #include "test_utilities.hh"
 #include <gtest/gtest.h>
 
@@ -25,7 +25,7 @@ namespace WBE = WhiteBirdEngine;
 constexpr size_t APT_HEADER_SIZE = WBE::HeapAllocatorPool::HEADER_SIZE;
 
 TEST(WBEAllocPoolTest, TraitTest) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     ASSERT_TRUE(WBE::AllocatorTrait<WBE::HeapAllocatorPool>::IS_POOL);
     ASSERT_TRUE(WBE::AllocatorTrait<WBE::HeapAllocatorPool>::IS_LIMITED_SIZE);
     ASSERT_FALSE(WBE::AllocatorTrait<WBE::HeapAllocatorPool>::IS_GURANTEED_CONTINUOUS);
@@ -34,7 +34,7 @@ TEST(WBEAllocPoolTest, TraitTest) {
 }
 
 TEST(WBEAllocPoolTest, ToString) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     WBE::HeapAllocatorPool pool(1024);
     WBEAllocPoolBehavTestClass behv_test("HeapAllocatorPool", 1024, APT_HEADER_SIZE);
     std::string exp_1 = behv_test({
@@ -73,7 +73,7 @@ TEST(WBEAllocPoolTest, ToString) {
 }
 
 TEST(WBEAllocPoolTest, RemoveIdleFront) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     WBE::HeapAllocatorPool pool(1024);
     WBEAllocPoolBehavTestClass behv_test("HeapAllocatorPool", 1024, APT_HEADER_SIZE);
     WBE::MemID mem1 = pool.allocate(4);
@@ -111,7 +111,7 @@ TEST(WBEAllocPoolTest, RemoveIdleFront) {
 }
 
 TEST(WBEAllocPoolTest, RemoveIdleBack) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     WBE::HeapAllocatorPool pool(1024);
     WBEAllocPoolBehavTestClass behv_test("HeapAllocatorPool", 1024, APT_HEADER_SIZE);
     WBE::MemID mem1 = pool.allocate(4);
@@ -149,7 +149,7 @@ TEST(WBEAllocPoolTest, RemoveIdleBack) {
 }
 
 TEST(WBEAllocPoolTest, RemoveIdleMiddle) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     WBE::HeapAllocatorPool pool(1024);
     WBEAllocPoolBehavTestClass behv_test("HeapAllocatorPool", 1024, APT_HEADER_SIZE);
     WBE::MemID mem1 = pool.allocate(4);
@@ -200,7 +200,7 @@ TEST(WBEAllocPoolTest, RemoveIdleMiddle) {
 }
 
 TEST(WBEAllocPoolTest, RemoveIdleEnd) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     WBE::HeapAllocatorPool pool(1024);
     WBEAllocPoolBehavTestClass behv_test("HeapAllocatorPool", 1024, APT_HEADER_SIZE);
     WBE::MemID mem1 = pool.allocate(4);
@@ -233,7 +233,7 @@ TEST(WBEAllocPoolTest, RemoveIdleEnd) {
 }
 
 TEST(WBEAllocPoolTest, RemainSize) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     
     WhiteBirdEngine::HeapAllocatorPool pool(1024);
     WBE::MemID mem = pool.allocate(2);
@@ -247,7 +247,7 @@ TEST(WBEAllocPoolTest, RemainSize) {
 }
 
 TEST(WBEAllocPoolTest, ConstructDestructCall) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     uint32_t test_val = 0;
     class TestClass {
     public:
@@ -268,7 +268,7 @@ TEST(WBEAllocPoolTest, ConstructDestructCall) {
 }
 
 TEST(WBEAllocPoolTest, WithDiffInstances) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     class TestBase {
     public:
         TestBase() {
@@ -309,7 +309,7 @@ TEST(WBEAllocPoolTest, WithDiffInstances) {
 }
 
 TEST(WBEAllocPoolTest, GetMemoryAddress) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     WhiteBirdEngine::HeapAllocatorPool allocator = WhiteBirdEngine::HeapAllocatorPool(1024);
     WBE::MemID mem1 = allocator.allocate(16);
     WBE::MemID mem2 = allocator.allocate(32);
@@ -333,14 +333,14 @@ TEST(WBEAllocPoolTest, GetMemoryAddress) {
 }
 
 TEST(WBEAllocPoolTest, GetNullMemoryAddress) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     WhiteBirdEngine::HeapAllocatorPool allocator = WhiteBirdEngine::HeapAllocatorPool(1024);
     void* addr = allocator.get(WBE::MEM_NULL);
     ASSERT_EQ(addr, nullptr);
 }
 
 TEST(WBEAllocPoolTest, MaxDataSizeTracker) {
-    std::unique_ptr<WBE::EngineCore> engine_core = std::make_unique<WBE::EngineCore>(0, nullptr, WBE::Directory({"test_env"}));
+    std::unique_ptr<WBE::Global> global = std::make_unique<WBE::Global>(0, nullptr, WBE::Directory({"test_env"}));
     WhiteBirdEngine::HeapAllocatorPool allocator = WhiteBirdEngine::HeapAllocatorPool(1024);
     ASSERT_EQ(allocator.get_max_data_size(), 0);
     WBE::MemID mem1 = allocator.allocate(100);
