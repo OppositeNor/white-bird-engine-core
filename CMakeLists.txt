@@ -1,0 +1,126 @@
+# Copyright 2025 OppositeNor
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+cmake_minimum_required(VERSION 3.20)
+
+project(WhiteBirdEngineCore)
+
+# Options
+option(WBE_MAKE_TEST "Export test for White Bird Engine" ON)
+set(WBE_BUILD_PLATFORM ${CMAKE_SYSTEM_NAME} CACHE STRING "Build platform.")
+
+# Use C++ 20 standard
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Export compile commands
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Define output paths
+set(WBE_RESOURCE_DIR ${PROJECT_SOURCE_DIR}/res)
+set(WBE_RESOURCE_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/res)
+
+set(WBE_METADATA_OUTPUT_PATH ${WBE_RESOURCE_OUTPUT_DIR}/metadata.json)
+
+set(WBE_CONFIG_DIR ${WBE_RESOURCE_DIR}/config)
+set(WBE_CONFIG_OUTPUT_DIR ${WBE_RESOURCE_OUTPUT_DIR}/config)
+
+set(WBE_METADATA_CACHE_DIR ${CMAKE_CURRENT_BINARY_DIR}/metadata_cache)
+
+set(WBE_TEST_ENV_DIR ${PROJECT_SOURCE_DIR}/test_env)
+set(WBE_TEST_ENV_RES_DIR ${WBE_TEST_ENV_DIR}/res)
+
+set(BUILD_TESTING OFF)
+find_package(Vulkan REQUIRED)
+
+set(YAML_BUILD_SHARED_LIBS OFF)
+set(YAML_CPP_BUILD_TESTS OFF)
+set(YAML_CPP_BUILD_TOOLS OFF)
+add_subdirectory(dependencies/yaml-cpp)
+set(BUILD_TESTING OFF)
+add_subdirectory(dependencies/boost)
+
+# Set C++ build flags
+if (NOT MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic-errors")
+endif()
+if (CMAKE_BUILD_TYPE STREQUAL "Deploy")
+    ## for optimization
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -flto -DNDEBUG")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+    ## for optimization and testing
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -flto -g -DNDEBUG")
+else()
+    ## for gdb or valgrind
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fno-inline -fno-omit-frame-pointer -D_DEBUG")
+endif()
+
+if (WBE_MAKE_TEST)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWBE_BUILD_TEST=OFF")
+endif()
+
+# Set include directories
+set(include_dirs 
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/dependencies/json/single_include
+    ${PROJECT_SOURCE_DIR}/dependencies/yaml-cpp/include
+    ${PROJECT_SOURCE_DIR}/dependencies/boost-headers
+)
+include_directories(
+    ${include_dirs}
+)
+
+set(libs ${libs}
+    Vulkan::Vulkan
+    yaml-cpp::yaml-cpp
+    boost_thread
+)
+
+# Add engine source
+add_subdirectory(src/platform)
+add_subdirectory(src/core)
+
+add_library(WhiteBirdEngine::Platform ALIAS WBE_PLATFORM)
+add_library(WhiteBirdEngine::Core ALIAS WBE_CORE)
+
+# Generate test executables
+set(WBE_TEST_EXE "")
+if (WBE_MAKE_TEST)
+    # Export tests
+    add_subdirectory(dependencies/googletest)
+    set(include_dirs
+        ${include_dirs}
+        ${PROJECT_SOURCE_DIR}/dependencies/googletest/googletest
+    )
+    add_subdirectory(tests)
+endif()
+
+# Run all tests
+if (WBE_MAKE_TEST)
+    add_custom_target(wbe_run_tests
+        COMMENT "Running White Bird Engine tests..."
+        COMMAND python3 ${PROJECT_SOURCE_DIR}/test_script/run_tests.py ${WBE_TEST_EXE}
+    )
+
+    add_custom_target(wbe_setup_test_env
+        COMMENT "Setting up test_env..."
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${WBE_METADATA_OUTPUT_PATH}"
+            "${WBE_TEST_ENV_RES_DIR}"
+    )
+
+endif()
+
+if (WBE_MAKE_TEST)
+    add_dependencies(wbe_run_tests wbe_setup_test_env)
+endif()
