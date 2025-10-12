@@ -2,7 +2,7 @@
 
 > A free game engine.
 >
-> Licensed under [Apache License Version 2.0](https://github.com/OppositeNor/white-bird-engine/blob/main/LICENSE).
+> Licensed under [Apache License Version 2.0](https://github.com/OppositeNor/white-bird-engine-core/blob/main/LICENSE).
 
 - [简体中文](./README.zh-Hans.md)
 
