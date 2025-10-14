@@ -41,7 +41,6 @@ set(WBE_TEST_ENV_DIR ${PROJECT_SOURCE_DIR}/test_env)
 set(WBE_TEST_ENV_RES_DIR ${WBE_TEST_ENV_DIR}/res)
 
 set(BUILD_TESTING OFF)
-find_package(Vulkan REQUIRED)
 
 set(YAML_BUILD_SHARED_LIBS OFF)
 set(YAML_CPP_BUILD_TESTS OFF)
@@ -81,7 +80,6 @@ include_directories(
 )
 
 set(libs ${libs}
-    Vulkan::Vulkan
     yaml-cpp::yaml-cpp
     boost_thread
 )
@@ -93,6 +91,7 @@ add_subdirectory(src/global)
 
 add_library(WhiteBirdEngine::Platform ALIAS WBE_PLATFORM)
 add_library(WhiteBirdEngine::Core ALIAS WBE_CORE)
+add_library(WhiteBirdEngine::Global ALIAS WBE_GLOBAL)
 
 # Generate test executables
 set(WBE_TEST_EXE "")

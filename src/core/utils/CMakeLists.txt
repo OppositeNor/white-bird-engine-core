@@ -11,31 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-set(TEST_NAME wbe_profiler_test)
+file(GLOB wbe_utils_src ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-# ---
-
-file(GLOB ${TEST_NAME}_headers ${CMAKE_CURRENT_SOURCE_DIR}/*.hh)
-file(GLOB ${TEST_NAME}_src ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-
-add_executable(${TEST_NAME}
-    ${${TEST_NAME}_src}
+set(wbe_core_src
+    ${wbe_core_src}
+    ${wbe_utils_src}
+    PARENT_SCOPE
 )
-
-target_link_libraries(${TEST_NAME}
-    WBE_GLOBAL
-    gtest_main
-)
-
-if(WBE_BUILD_PLATFORM STREQUAL "Windows")
-    set(WBE_TEST_EXE ${WBE_TEST_EXE}
-        ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}.exe
-        PARENT_SCOPE
-    )
-else()
-    set(WBE_TEST_EXE ${WBE_TEST_EXE}
-        ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}
-        PARENT_SCOPE
-    )
-endif()
-

@@ -16,7 +16,7 @@
 #include "core/allocator/allocator.hh"
 #include "core/cla/cla_ast.hh"
 #include "core/memory/reference_strong.hh"
-#include "core/engine_core.hh"
+#include "global/global.hh"
 #include <stdexcept>
 #include <string>
 
