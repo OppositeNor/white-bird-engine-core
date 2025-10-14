@@ -11,3 +11,4 @@ vgcore*
 
 test_env/res/metadata.json
 generated/
+*.gen*
