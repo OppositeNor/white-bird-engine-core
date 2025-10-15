@@ -11,7 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 add_subdirectory(unit)
+add_subdirectory(intergration)
+add_subdirectory(benchmark)
 
 set(WBE_TEST_EXE ${WBE_TEST_EXE}
     PARENT_SCOPE
