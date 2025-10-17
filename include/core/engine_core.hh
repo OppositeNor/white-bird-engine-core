@@ -18,9 +18,9 @@
 #include "core/allocator/stack_allocator.hh"
 #include "core/engine_config/engine_config.hh"
 #include "core/clock/clock.hh"
-#include "utils/game_metadata.hh"
 #include "core/logging/log_stream.hh"
 #include "core/logging/logging_manager.hh"
+#include "generated/label_manager.gen.hh"
 #include "platform/file_system/file_system.hh"
 #include "utils/interface/singleton.hh"
 
@@ -90,11 +90,10 @@ public:
      * @brief Manager for profiling.
      */
     class ProfilingManager* profiling_manager;
-
     /**
-     * @brief Metadata of the game.
+     * @brief Manager for the labels.
      */
-    GameMetadata* game_metadata;
+    LabelManager* label_manager;
 
 private:
     void parse_metadata(const Path& p_metadata_config_path);
