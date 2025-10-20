@@ -68,3 +68,15 @@ python ./build.py -t debug-gcc      # Debug target with GCC compiler
 python ./build.py -t release-gcc    # Release target with GCC compiler
 python ./build.py -t deploy         # Deploy target with GCC compiler
 ```
+
+## Benchmark results
+
+```sh
+Allocators:
+------------------------------------------------------------------------------------------
+Benchmark                                                Time             CPU   Iterations
+------------------------------------------------------------------------------------------
+malloc_free_benchmark                                 1458 ns         1338 ns       507112
+heap_allocated_aligned_pool_benchmark                  118 ns          118 ns      5659673
+heap_allocated_aligned_pool_impl_list_benchmark       6247 ns         6162 ns       112795
+```
