@@ -26,7 +26,9 @@ add_executable(${BENCHMARK_NAME}
 )
 
 target_link_libraries(${BENCHMARK_NAME}
-    ${libs}
+    WBE_PLATFORM
+    WBE_CORE
+    WBE_GLOBAL
     benchmark_main
 )
 

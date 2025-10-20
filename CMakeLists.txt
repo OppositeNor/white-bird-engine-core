@@ -91,6 +91,8 @@ if (WBE_MAKE_TEST)
     )
 endif()
 
+include_directories(${include_dirs})
+
 set(libs ${libs}
     yaml-cpp::yaml-cpp
     boost_thread
