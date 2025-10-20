@@ -48,6 +48,11 @@ set(YAML_CPP_BUILD_TOOLS OFF)
 add_subdirectory(dependencies/yaml-cpp)
 set(BUILD_TESTING OFF)
 add_subdirectory(dependencies/boost)
+if (WBE_MAKE_TEST)
+    add_subdirectory(dependencies/googletest)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-command-line-argument")
+    add_subdirectory(dependencies/google-benchmark)
+endif()
 
 # Set C++ build flags
 if (NOT MSVC)
@@ -70,14 +75,21 @@ endif()
 
 # Set include directories
 set(include_dirs 
+    ${Vulkan_INCLUDE_DIR}
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/dependencies/glm
     ${PROJECT_SOURCE_DIR}/dependencies/json/single_include
     ${PROJECT_SOURCE_DIR}/dependencies/yaml-cpp/include
+    ${PROJECT_SOURCE_DIR}/dependencies/stb
     ${PROJECT_SOURCE_DIR}/dependencies/boost-headers
 )
-include_directories(
-    ${include_dirs}
-)
+if (WBE_MAKE_TEST)
+    set(include_dirs
+        ${include_dirs}
+        ${PROJECT_SOURCE_DIR}/dependencies/googletest/googletest
+        ${PROJECT_SOURCE_DIR}/dependencies/google-benchmark/include
+    )
+endif()
 
 set(libs ${libs}
     yaml-cpp::yaml-cpp
@@ -97,11 +109,6 @@ add_library(WhiteBirdEngine::Global ALIAS WBE_GLOBAL)
 set(WBE_TEST_EXE "")
 if (WBE_MAKE_TEST)
     # Export tests
-    add_subdirectory(dependencies/googletest)
-    set(include_dirs
-        ${include_dirs}
-        ${PROJECT_SOURCE_DIR}/dependencies/googletest/googletest
-    )
     add_subdirectory(tests)
 endif()
 
