@@ -68,3 +68,25 @@ python ./build.py -t debug-gcc      # 使用 GCC 的 Debug 构建
 python ./build.py -t release-gcc    # 使用 GCC 的 Release 构建
 python ./build.py -t deploy         # 使用 GCC 的部署构建
 ```
+
+## 基准测试结果：
+
+```
+分配器（乱序释放）:
+----------------------------------------------------------------------------------------------------------
+Benchmark                                                                Time             CPU   Iterations
+----------------------------------------------------------------------------------------------------------
+malloc_free_benchmark_with_shuffle                                     679 ns          676 ns       939593
+heap_allocated_aligned_pool_benchmark_with_shuffle                    1460 ns         1456 ns       468061
+heap_allocated_aligned_pool_impl_list_benchmark_with_shuffle           144 ns          144 ns      4848775
+```
+
+```
+分配器（顺序释放）:
+----------------------------------------------------------------------------------------------------------
+Benchmark                                                                Time             CPU   Iterations
+----------------------------------------------------------------------------------------------------------
+malloc_free_benchmark_without_shuffle                                  679 ns          655 ns      1083339
+heap_allocated_aligned_pool_benchmark_without_shuffle                  127 ns          125 ns      5411608
+heap_allocated_aligned_pool_impl_list_benchmark_without_shuffle        141 ns          138 ns      5159772
+```

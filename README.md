@@ -71,12 +71,22 @@ python ./build.py -t deploy         # Deploy target with GCC compiler
 
 ## Benchmark results
 
-```sh
-Allocators:
-------------------------------------------------------------------------------------------
-Benchmark                                                Time             CPU   Iterations
-------------------------------------------------------------------------------------------
-malloc_free_benchmark                                 1458 ns         1338 ns       507112
-heap_allocated_aligned_pool_benchmark                  118 ns          118 ns      5659673
-heap_allocated_aligned_pool_impl_list_benchmark       6247 ns         6162 ns       112795
+```
+Allocators (shuffle destruction order):
+----------------------------------------------------------------------------------------------------------
+Benchmark                                                                Time             CPU   Iterations
+----------------------------------------------------------------------------------------------------------
+malloc_free_benchmark_with_shuffle                                     679 ns          676 ns       939593
+heap_allocated_aligned_pool_benchmark_with_shuffle                    1460 ns         1456 ns       468061
+heap_allocated_aligned_pool_impl_list_benchmark_with_shuffle           144 ns          144 ns      4848775
+```
+
+```
+Allocators (ordered destruction):
+----------------------------------------------------------------------------------------------------------
+Benchmark                                                                Time             CPU   Iterations
+----------------------------------------------------------------------------------------------------------
+malloc_free_benchmark_without_shuffle                                  679 ns          655 ns      1083339
+heap_allocated_aligned_pool_benchmark_without_shuffle                  127 ns          125 ns      5411608
+heap_allocated_aligned_pool_impl_list_benchmark_without_shuffle        141 ns          138 ns      5159772
 ```
