@@ -1,4 +1,4 @@
-/* Copyright 2025 OppositeNor
+{# Copyright 2025 OppositeNor
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -11,6 +11,26 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
-#include "serializer_json_test.hh"
-#include "serializer_yaml_test.hh"
+#}
+# {{ _prefix }}
+
+set(TEST_NAME {{ name }})
+
+# ---
+
+{% for exe in exes %}
+add_executable(${TEST_NAME}_{{ exe.name }}
+    {% for source in exe.sources %}
+    {{ source }}
+    {% endfor %}
+)
+
+target_link_libraries(${TEST_NAME}_{{ exe.name }}
+    WBE_PLATFORM
+    WBE_CORE
+    WBE_GLOBAL
+    gtest_main
+)
+
+{% endfor %}
+

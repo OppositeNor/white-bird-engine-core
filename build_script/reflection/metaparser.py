@@ -16,7 +16,7 @@ from build_script.utils import hash_file, hash_str_sha256
 from build_script.reflection.reflect import WBEReflector
 import clang.cindex
 import json
-from build_script.reflection.metadata_types import WBEClassMetadata, WBEComponentMetadata, WBEFieldMetadata, WBEFileMetadata, WBELabelMetadata, WBEMetadata
+from build_script.reflection.metadata_types import WBEClassMetadata, WBEStructMetadata, WBEFieldMetadata, WBEFileMetadata, WBELabelMetadata, WBEMetadata
 
 WBE_REFLECT = "WBE_REFLECT"
 WBE_COMPONENT = "WBE_COMPONENT"
@@ -42,7 +42,6 @@ class WBEMetaparser:
         self.cache_dir = cache_dir
         self.sources = sources
         self._metadata = {}
-        self._components_headers = set()
 
     def parse(self, cpp_file_path : str):
         """Parse the C++ file.
@@ -50,6 +49,9 @@ class WBEMetaparser:
         Args:
             cpp_file_path: The path to the C++ file.
         """
+        if ".gen" in cpp_file_path:
+            # skip the generated files.
+            return
         file_cache_path = os.path.join(self.cache_dir, f"{hash_str_sha256(cpp_file_path)}.json")
         self._get_metadata(cpp_file_path, file_cache_path)
 
@@ -65,8 +67,6 @@ class WBEMetaparser:
             result = self._register_from_cache(cpp_file_path, cache_path)
         else:
             result = self._register_from_clang(cpp_file_path, cache_path)
-        if len(result.components) > 0:
-            self._components_headers.add(cpp_file_path)
         return result
 
     def _register_from_cache(self, cpp_file_path, cache_path):
@@ -79,18 +79,31 @@ class WBEMetaparser:
                 return self._register_from_clang(cpp_file_path, cache_path)
             self._metadata[cpp_file_path] = metadata
             return metadata
-        except:
+        except Exception as e:
+            print("Exception thrown:", e)
+            print("Retrying...")
             return self._register_from_clang(cpp_file_path, cache_path)
+
+    def _sorted_metadata_by_dependency(self):
+        result = []
+        metadata_with_depth = {key : [0, value] for key, value in self._metadata.items()}
+        for _, metadata in metadata_with_depth.items():
+            deps = [metadata_with_depth.get(dep_metadata) for dep_metadata in metadata[1].deps]
+            for dep in deps:
+                if dep is not None:
+                    dep[0] += 1
+            result.append(metadata)
+        sorted(result, key=lambda v: v[0], reverse=True)
+        return [item[1] for item in result]
 
     def _export_metadata(self):
         result_metadata = WBEMetadata()
-        for _, metadata in self._metadata.items():
+        sorted_metadata = self._sorted_metadata_by_dependency()
+        for metadata in sorted_metadata:
             result_metadata.labels.extend(metadata.labels)
             result_metadata.classes.extend(metadata.classes)
-            result_metadata.components.extend(metadata.components)
-        result_metadata.sort()
+            result_metadata.structs.extend(metadata.structs)
         self.reflector.register_metadata(result_metadata)
-        self.reflector.register_components_headers(self._components_headers)
 
     def _register_from_clang(self, cpp_file_path, cache_path):
         print(f"WBEMetaparser: parsing {cpp_file_path}")
@@ -103,50 +116,58 @@ class WBEMetaparser:
         metadata = WBEFileMetadata()
         metadata.deps = self._get_include_deps(tu)
         metadata.file_path = cpp_file_path
-        self._register_metadata(tu, metadata)
+        self._register_metadata(tu, metadata, cpp_file_path)
         metadata.hashcode = hash_file(cpp_file_path)
         self._metadata[cpp_file_path] = metadata
         with open(cache_path, "w") as f:
             json.dump(metadata.model_dump(), f, indent=4)
         return metadata
 
-    def _register_metadata(self, tu, metadata : WBEFileMetadata):
-        for attribute, data in self._visit_attributes(metadata, tu.cursor):
-            getattr(metadata, attribute).append(data)
+    def _register_metadata(self, tu, metadata : WBEFileMetadata, in_file):
+        self._visit_attributes(metadata, tu.cursor, in_file)
 
-    def _visit_attributes(self, metadata, cursor):
+    def _visit_attributes(self, metadata, cursor, in_file):
         if cursor.kind == clang.cindex.CursorKind.VAR_DECL:
-            yield from self._handle_visit_var_decl(metadata, cursor)
+            self._handle_visit_var_decl(metadata, cursor)
         elif cursor.kind == clang.cindex.CursorKind.CLASS_DECL:
-            yield from self._handle_visit_class_decl(metadata, cursor)
+            self._handle_visit_class_decl(metadata, cursor)
         elif cursor.kind == clang.cindex.CursorKind.STRUCT_DECL:
-            yield from self._handle_visit_struct_decl(metadata, cursor)
+            self._handle_visit_struct_decl(metadata, cursor, in_file)
 
         for child in cursor.get_children():
             if child.kind != clang.cindex.CursorKind.ANNOTATE_ATTR:
-                yield from self._visit_attributes(metadata, child)
+                self._visit_attributes(metadata, child, in_file)
+
+    @staticmethod
+    def _is_in_namelist(name, namelist):
+        return any(name == item.name for item in namelist)
 
     def _handle_visit_var_decl(self, metadata, cursor):
         for attr in cursor.get_children():
             if attr.kind == clang.cindex.CursorKind.ANNOTATE_ATTR:
-                if not self._any_all(metadata, lambda metadata:
-                        any(cursor.spelling == label.label_name for label in metadata.labels)):
-                    yield "labels", WBELabelMetadata(label_name=cursor.spelling, attribute=self._get_attributes(attr.spelling))
+                if not self._any_all(metadata, lambda curr_metadata:
+                        WBEMetaparser._is_in_namelist(cursor.spelling, curr_metadata.labels)):
+                    attributes = self._get_attributes(attr.spelling)
+                    label_metadata = WBELabelMetadata(name=cursor.spelling, attribute=attributes)
+                    metadata.labels.append(label_metadata)
 
     def _handle_visit_class_decl(self, metadata, cursor):
         for attr in cursor.get_children():
             if attr.kind == clang.cindex.CursorKind.ANNOTATE_ATTR:
-                if not self._any_all(metadata, lambda metadata:
-                        any(cursor.spelling == metad_class.class_name for metad_class in metadata.classes)):
-                    yield "classes", self._get_class_metadata(cursor, attr.spelling)
+                if not self._any_all(metadata, lambda curr_metadata:
+                        WBEMetaparser._is_in_namelist(cursor.spelling, curr_metadata.classes)):
+                    attributes = self._get_attributes(attr.spelling)
+                    class_metadata = self._get_class_metadata(cursor, attributes)
+                    metadata.classes.append(class_metadata)
 
-    def _handle_visit_struct_decl(self, metadata, cursor):
+    def _handle_visit_struct_decl(self, metadata, cursor, in_file):
         for attr in cursor.get_children():
             if attr.kind == clang.cindex.CursorKind.ANNOTATE_ATTR:
-                if WBE_COMPONENT in self._get_attributes(attr.spelling):
-                    if not self._any_all(metadata, lambda metadata:
-                            any(cursor.spelling == metad_struct.struct_name for metad_struct in metadata.components)):
-                        yield "components", self._get_component_metadata(cursor)
+                if not self._any_all(metadata, lambda curr_metadata:
+                        WBEMetaparser._is_in_namelist(cursor.spelling, curr_metadata.structs)):
+                    attributes = self._get_attributes(attr.spelling)
+                    component_metadata = self._get_struct_metadata(cursor, attributes, in_file)
+                    metadata.structs.append(component_metadata)
 
     def _read_from_cache(self, cpp_file_path, cache_path):
         with open(cache_path) as f:
@@ -159,7 +180,7 @@ class WBEMetaparser:
         deps = set()
         for inclusion in tu.get_includes():
             incl_path_abs = os.path.abspath(inclusion.include.name)
-            if incl_path_abs in self.sources:
+            if incl_path_abs in self.sources and '.gen' not in incl_path_abs:
                 deps.add(incl_path_abs)
         return list(deps)
 
@@ -173,16 +194,18 @@ class WBEMetaparser:
                 return True
         return False
 
-    def _get_class_metadata(self, cursor, attribute):
+    def _get_class_metadata(self, cursor, attributes):
         result = WBEClassMetadata()
-        result.class_name = cursor.spelling
-        result.attribute = self._get_attributes(attribute)
+        result.name = cursor.spelling
+        result.attribute = attributes
         # TODO
-        return WBEClassMetadata(class_name=cursor.spelling)
+        return WBEClassMetadata(name=cursor.spelling)
 
-    def _get_component_metadata(self, cursor):
-        result = WBEComponentMetadata()
-        result.struct_name = cursor.spelling
+    def _get_struct_metadata(self, cursor, attributes, in_file):
+        result = WBEStructMetadata()
+        result.in_header = in_file
+        result.name = cursor.spelling
+        result.attribute = attributes
         for field in cursor.get_children():
             if field.kind != clang.cindex.CursorKind.FIELD_DECL:
                 continue
@@ -192,7 +215,7 @@ class WBEMetaparser:
                 attributes = self._get_attributes(attr.spelling)
                 if WBE_REFLECT in attributes:
                     result.fields.append(WBEFieldMetadata(attribute=self._get_attributes(attr.spelling),
-                                                          field_name=field.spelling, field_type=field.type.spelling))
+                                                          name=field.spelling, type=field.type.spelling))
         return result
 
     def _get_attributes(self, attr_spelling : str) -> list[str]:

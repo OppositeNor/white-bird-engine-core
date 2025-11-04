@@ -1,9 +1,10 @@
 [
     {
         "output_name" : "unit_test.gen.cmake",
-        "template" : "unit_test.jinja",
+        "template" : "unit_test.cmake.jinja",
         "data" : {
-            "name" : "wbe_serializer_test"
+            "name" : "wbe_reflection_test"
         }
     }
 ]
+

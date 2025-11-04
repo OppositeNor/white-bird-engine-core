@@ -69,10 +69,20 @@ test_dir = "tests"
 test_env_dir = "test_env"
 resource_dir = "res"
 
-static_labels = [
-    "WBE_CHANNEL"
-]
-
-dynamic_labels = [
-    "WBE_CHANNEL"
-]
+gen_info = {
+    "static_labels" : [
+        "WBE_CHANNEL",
+        "WBE_RENDER_OBJECT_TYPE",
+        "WBE_RENDER_TASK",
+    ],
+    "dynamic_labels" : [
+        "WBE_CHANNEL",
+        "WBE_RENDER_OBJECT_TYPE",
+        "WBE_RENDER_TASK",
+    ],
+    "serializables" : [
+        "WBE_SERIALIZABLE",
+        "WBE_COMPONENT",
+        "WBE_CONFIG_OPTION"
+    ]
+}

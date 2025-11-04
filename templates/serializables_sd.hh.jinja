@@ -1,0 +1,86 @@
+{# Copyright 2025 OppositeNor
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+#}
+// {{ _prefix }}
+
+#ifndef __WBE_SERIALIZABLES_SD_HH__
+#define __WBE_SERIALIZABLES_SD_HH__
+
+#include "core/reflection/serializable.hh"
+{% for serializable in metadata.structs %}
+{% if serializable.attribute | select("in", serializables) | list | length > 0  %}
+#include "{{ serializable.in_header }}"
+{% endif %}
+{% endfor %}
+
+namespace WhiteBirdEngine {
+
+{% for serializable in metadata.structs %}
+{% if serializable.attribute | select("in", serializables) | list | length > 0  %}
+/**
+ * @class SerializableSD<{{ serializable.name }}>
+ * @brief Serializer/deserializer for {{ serializable.name }}.
+ */
+template <>
+class SerializableSD<{{ serializable.name }}> {
+public:
+    SerializableSD() = default;
+    ~SerializableSD() {}
+    SerializableSD(const SerializableSD&) = delete;
+    SerializableSD(SerializableSD&&) = delete;
+    SerializableSD& operator=(const SerializableSD&) = delete;
+    SerializableSD& operator=(SerializableSD&&) = delete;
+
+    using ObjType = {{ serializable.name }};
+
+    /**
+     * @brief Serialize.
+     *
+     * @tparam ParserData The type of the data.
+     * @param p_key The key to insert into p_data.
+     * @param p_data The data to insert result.
+     * @param p_serializable The object to serialize.
+     */
+    template <typename ParserData>
+    static void serialize(ParserData& p_data, const ObjType& p_serializable) {
+        ParserData result;
+        {% for field in serializable.fields %}
+        SerializableSD<decltype(p_serializable.{{ field.name }})>::serialize(result, p_serializable.{{ field.name }});
+        p_data.set_value("{{ field.name }}", result);
+        result = ParserData();
+        {% endfor %}
+    }
+
+    /**
+     * @brief Deserialize.
+     *
+     * @tparam ParserData The type of the data.
+     * @param p_data The data to retrieve value from.
+     * @param p_serializable The object to deserialize.
+     */
+    template <typename ParserData>
+    static void deserialize(const ParserData& p_data, ObjType& p_serializable) {
+        {% for field in serializable.fields %}
+        if (p_data.contains("{{ field.name }}")) {
+            SerializableSD<decltype(p_serializable.{{ field.name }})>::deserialize(p_data.template get_value<ParserData>("{{ field.name }}"), p_serializable.{{ field.name }});
+        }
+        {% endfor %}
+    }
+};
+{% endif %}
+{% endfor %}
+
+}
+
+#endif
