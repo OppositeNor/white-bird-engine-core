@@ -12,15 +12,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#ifndef __WBE_HEAP_ALLOCATOR_ALIGNED_POOL_IMPL_LIST_HH__
-#define __WBE_HEAP_ALLOCATOR_ALIGNED_POOL_IMPL_LIST_HH__
+#ifndef __WBE_HEAP_ALLOCATOR_ATOMIC_ALIGNED_POOL_IMPL_LIST_HH__
+#define __WBE_HEAP_ALLOCATOR_ATOMIC_ALIGNED_POOL_IMPL_LIST_HH__
 
 #include "core/allocator/allocator.hh"
 #include "core/allocator/heap_allocator_aligned.hh"
+#include "core/debug_utils/debug_mutex.hh"
 #include "utils/defs.hh"
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <boost/thread/lock_types.hpp>
+#include <boost/thread/shared_mutex.hpp>
+#include <string>
 
 #define WBE_HAAPIL_GET_HEADER_SIZE(p_header) p_header & TOTAL_SIZE_MASK
 #define WBE_HAAPIL_GET_CHUNK_SIZE(p_chunk) WBE_HAAPIL_GET_HEADER_SIZE(*reinterpret_cast<Header*>(p_mem_chunk))
@@ -31,31 +35,31 @@
 namespace WhiteBirdEngine {
 
 template <>
-struct AllocatorTrait<class HeapAllocatorAlignedPoolImplicitList> final : public AllocatorTrait<HeapAllocatorAligned> {
-    WBE_TRAIT(AllocatorTrait<HeapAllocatorAlignedPoolImplicitList>);
+struct AllocatorTrait<class HeapAllocatorAtomicAlignedPoolImplicitList> final : public AllocatorTrait<HeapAllocatorAligned> {
+    WBE_TRAIT(AllocatorTrait<HeapAllocatorAtomicAlignedPoolImplicitList>);
     static constexpr bool IS_POOL = true;
     static constexpr bool IS_GURANTEED_CONTINUOUS = false;
     static constexpr bool IS_LIMITED_SIZE = true;
     static constexpr bool IS_ALLOC_FIXED_SIZE = false;
-    static constexpr bool IS_ATOMIC = false;
+    static constexpr bool IS_ATOMIC = true;
     static constexpr bool WILL_ADDR_MOVE = false;
 
     WBE_TRAIT_REQUIRES(AllocatorTraitConcept);
 };
 
 /**
- * @class HeapAllocatorAlignedPoolImplicitList
- * @brief Heap allocator pool with memory alignment support, with an implicit list.
+ * @class HeapAllocatorAtomicAlignedPoolImplicitList
+ * @brief Heap allocator atomic pool with memory alignment support, with an implicit list.
  */
-class HeapAllocatorAlignedPoolImplicitList final : public HeapAllocatorAligned {
+class HeapAllocatorAtomicAlignedPoolImplicitList final : public HeapAllocatorAligned {
 public:
-    HeapAllocatorAlignedPoolImplicitList()
-        : HeapAllocatorAlignedPoolImplicitList(WBE_KiB(64)) {}
-    virtual ~HeapAllocatorAlignedPoolImplicitList() override;
-    HeapAllocatorAlignedPoolImplicitList(const HeapAllocatorAlignedPoolImplicitList&) = delete;
-    HeapAllocatorAlignedPoolImplicitList(HeapAllocatorAlignedPoolImplicitList&&) = delete;
-    HeapAllocatorAlignedPoolImplicitList& operator=(const HeapAllocatorAlignedPoolImplicitList&) = delete;
-    HeapAllocatorAlignedPoolImplicitList& operator=(HeapAllocatorAlignedPoolImplicitList&&) = delete;
+    HeapAllocatorAtomicAlignedPoolImplicitList()
+    : HeapAllocatorAtomicAlignedPoolImplicitList(WBE_KiB(64)) {}
+    virtual ~HeapAllocatorAtomicAlignedPoolImplicitList() override;
+    HeapAllocatorAtomicAlignedPoolImplicitList(const HeapAllocatorAtomicAlignedPoolImplicitList&) = delete;
+    HeapAllocatorAtomicAlignedPoolImplicitList(HeapAllocatorAtomicAlignedPoolImplicitList&&) = delete;
+    HeapAllocatorAtomicAlignedPoolImplicitList& operator=(const HeapAllocatorAtomicAlignedPoolImplicitList&) = delete;
+    HeapAllocatorAtomicAlignedPoolImplicitList& operator=(HeapAllocatorAtomicAlignedPoolImplicitList&&) = delete;
 
     using Header = uint64_t;
 
@@ -74,7 +78,7 @@ public:
      *
      * @param p_size The total size of the pool.
      */
-    HeapAllocatorAlignedPoolImplicitList(size_t p_size);
+    HeapAllocatorAtomicAlignedPoolImplicitList(size_t p_size);
 
     virtual MemID allocate(size_t p_size, size_t p_alignment = WORD_SIZE) override;
 
@@ -82,23 +86,27 @@ public:
 
     virtual void* get(MemID p_id) const override {
         if (p_id == MEM_NULL) {
-
             return nullptr;
         }
-        WBE_DEBUG_ASSERT(is_in_pool(p_id));
+        boost::shared_lock lock(mutex);
+        WBE_DEBUG_ASSERT(unguarded_is_in_pool(p_id));
         return reinterpret_cast<void*>(p_id);
     }
 
     virtual bool is_empty() const override {
-        return get_remain_size() == size;
+        boost::shared_lock lock(mutex);
+        size_t remain_size = get_remain_size();
+        return remain_size == size;
     }
 
     virtual void clear() override {
+        boost::unique_lock lock(mutex);
         WBE_HAAPIL_SET_CHUNK_HEADER(mem_chunk, HeaderType::IDLE, size);
         possible_valid = mem_chunk;
     }
 
     virtual size_t get_allocated_data_size(MemID p_mem_id) const override {
+        boost::shared_lock lock(mutex);
         return WBE_HAAPIL_GET_HEADER_SIZE(*reinterpret_cast<Header*>((p_mem_id - WORD_SIZE)));
     }
 
@@ -108,6 +116,7 @@ public:
      * @return The total size of the allocator.
      */
     size_t get_total_size() const {
+        boost::shared_lock lock(mutex);
         return size;
     }
 
@@ -126,6 +135,7 @@ public:
      * @return The internal fragmentation tracker.
      */
     size_t get_internal_fragmentation_tracker() const {
+        boost::shared_lock lock(mutex);
         return internal_fragmentation_tracker;
     }
 
@@ -142,6 +152,11 @@ private:
     size_t size;
     char* mem_chunk;
     mutable char* possible_valid;
+#ifdef _DEBUG
+    mutable DebugSharedMutex mutex;
+#else
+    mutable boost::shared_mutex mutex;
+#endif
 
     size_t internal_fragmentation_tracker = 0;
 
@@ -165,6 +180,9 @@ private:
 
     void coalesce_all() const;
     void coalesce_chunk(char* p_chunk) const;
+    bool unguarded_is_in_pool(MemID p_mem_id) const;
+
+    std::string unguarded_to_string() const;
 };
 
 }
