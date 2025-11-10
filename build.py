@@ -33,7 +33,7 @@ def _get_cmake_command_from_info(build_info):
     """Helper function which converts the build info to cmake command"""
     result = ["cmake"]
     result.append("-B")
-    result.append(build_info["export-directory"])
+    result.append(build_setup.build_dir)
     if build_info.get("generator") is not None:
         result.append("-G")
         result.append(build_info["generator"])
@@ -114,9 +114,8 @@ def _compile_shaders():
             raise RuntimeError("Failed to compile shader.")
 
 def _gather_gen_infos():
-    gen_info_files = [gen_info for gen_info in build_setup.project_files if os.path.basename(gen_info) == "generate.json"]
     gen_infos = []
-    for gen_info_file in gen_info_files:
+    for gen_info_file in build_setup.gen_info_files:
         with open(gen_info_file) as f:
             data = json.load(f)
         file_infos = [WBEGenFileInfo(**info) for info in data]
@@ -151,7 +150,7 @@ if __name__ == "__main__":
         result = subprocess.run(_get_cmake_command_from_info(build_setup.build_target))
         if result.returncode != 0:
             raise RuntimeError("Failed to setup cmake build.")
-        build_command = ["cmake", "--build", build_setup.build_target["export-directory"]]
+        build_command = ["cmake", "--build", build_setup.build_dir]
         if os.cpu_count() is not None:
             build_command.extend(["-j", str(os.cpu_count())])
         result = subprocess.run(build_command)
@@ -163,6 +162,8 @@ if __name__ == "__main__":
             print("WBEBuilder: Setting up test environemnt...")
             shutil.copy(os.path.join(build_setup.resource_output_dir, "metadata.json"), os.path.join(build_setup.test_env_resource_dir, "metadata.json"))
 
+        # For some reason my LSP only looks into build directory for compile_commands.json.
+        shutil.copy(os.path.join(build_setup.build_dir, "compile_commands.json"), "build")
         print("WBEBuilder: Finished!")
 
     except Exception as e:

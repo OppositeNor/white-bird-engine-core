@@ -3,12 +3,9 @@
 .vscode
 
 build
-release
-deploy
 
 __pycache__
 vgcore*
 
 test_env/res/metadata.json
-generated/
 *.gen*

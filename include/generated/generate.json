@@ -1,0 +1,35 @@
+[
+    {
+        "output_name" : "serializables_sd.gen.hh",
+        "template" : "serializables_sd.hh.jinja",
+        "data" : {
+            "metadata" : ".metadata",
+            "serializables" : ".serializables"
+        }
+    },
+    {
+        "output_name" : "serializables_access.gen.hh",
+        "template" : "serializables_access.hh.jinja",
+        "data" : {
+            "metadata" : ".metadata",
+            "serializables" : ".serializables"
+        }
+    },
+    {
+        "output_name" : "label_manager.gen.hh",
+        "template" : "label_manager.hh.jinja",
+        "data" : {
+            "metadata" : ".metadata",
+            "static_labels" : ".static_labels",
+            "dynamic_labels" : ".dynamic_labels"
+        }
+    },
+    {
+        "output_name" : "type_uuid.gen.hh",
+        "template" : "type_uuid.hh.jinja",
+        "data" : {
+            "metadata" : ".metadata",
+            "type_uuid" : ".type_uuid"
+        }
+    }
+]
