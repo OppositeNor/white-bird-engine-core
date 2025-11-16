@@ -62,7 +62,7 @@ public:
     /**
      * @brief The size of the allocated memory header.
      */
-    static constexpr size_t WORD_SIZE = sizeof(Header);
+    static constexpr size_t HEADER_SIZE = WBE_DEFAULT_ALIGNMENT;
 
     /**
      * @brief The maximum total size that the allocator can contain.
@@ -76,7 +76,7 @@ public:
      */
     HeapAllocatorAlignedPoolImplicitList(size_t p_size);
 
-    virtual MemID allocate(size_t p_size, size_t p_alignment = WORD_SIZE) override;
+    virtual MemID allocate(size_t p_size, size_t p_alignment = HEADER_SIZE) override;
 
     virtual void deallocate(MemID p_mem) override;
 
@@ -99,7 +99,7 @@ public:
     }
 
     virtual size_t get_allocated_data_size(MemID p_mem_id) const override {
-        return WBE_HAAPIL_GET_HEADER_SIZE(*reinterpret_cast<Header*>((p_mem_id - WORD_SIZE)));
+        return WBE_HAAPIL_GET_HEADER_SIZE(*reinterpret_cast<Header*>((p_mem_id - HEADER_SIZE)));
     }
 
     /**
@@ -137,6 +137,11 @@ public:
      */
     bool is_in_pool(MemID p_mem_id) const;
 
+    /**
+     * @brief Check if the pool is broken. Will throw if broken.
+     */
+    void check_broken() const;
+
 private:
 
     size_t size;
@@ -161,7 +166,6 @@ private:
     char* get_next_free_memory(char* p_from);
     void* acquire_memory(char* p_idle_chunk, char* p_mem_start, size_t p_mem_size);
     void insert_free_memory(char* p_insert_start, size_t p_insert_size);
-    void check_broken() const;
 
     void coalesce_all() const;
     void coalesce_chunk(char* p_chunk) const;

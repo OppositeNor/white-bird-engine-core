@@ -26,10 +26,10 @@
 #include <boost/thread/shared_mutex.hpp>
 #include <string>
 
-#define WBE_HAAPIL_GET_HEADER_SIZE(p_header) p_header & TOTAL_SIZE_MASK
-#define WBE_HAAPIL_GET_CHUNK_SIZE(p_chunk) WBE_HAAPIL_GET_HEADER_SIZE(*reinterpret_cast<Header*>(p_mem_chunk))
-#define WBE_HAAPIL_SET_HEADER(p_header, p_head_type, p_size) (*p_header = (((Header)(p_head_type) << 60) | (p_size)))
-#define WBE_HAAPIL_SET_CHUNK_HEADER(p_chunk, p_type, p_size) WBE_HAAPIL_SET_HEADER(reinterpret_cast<Header*>(p_chunk), (p_type), (p_size))
+#define WBE_HAAAPIL_GET_HEADER_SIZE(p_header) p_header & TOTAL_SIZE_MASK
+#define WBE_HAAAPIL_GET_CHUNK_SIZE(p_chunk) WBE_HAAAPIL_GET_HEADER_SIZE(*reinterpret_cast<Header*>(p_mem_chunk))
+#define WBE_HAAAPIL_SET_HEADER(p_header, p_head_type, p_size) (*p_header = (((Header)(p_head_type) << 60) | (p_size)))
+#define WBE_HAAAPIL_SET_CHUNK_HEADER(p_chunk, p_type, p_size) WBE_HAAAPIL_SET_HEADER(reinterpret_cast<Header*>(p_chunk), (p_type), (p_size))
 
 
 namespace WhiteBirdEngine {
@@ -66,7 +66,7 @@ public:
     /**
      * @brief The size of the allocated memory header.
      */
-    static constexpr size_t WORD_SIZE = sizeof(Header);
+    static constexpr size_t HEADER_SIZE = WBE_DEFAULT_ALIGNMENT;
 
     /**
      * @brief The maximum total size that the allocator can contain.
@@ -80,7 +80,7 @@ public:
      */
     HeapAllocatorAtomicAlignedPoolImplicitList(size_t p_size);
 
-    virtual MemID allocate(size_t p_size, size_t p_alignment = WORD_SIZE) override;
+    virtual MemID allocate(size_t p_size, size_t p_alignment = HEADER_SIZE) override;
 
     virtual void deallocate(MemID p_mem) override;
 
@@ -88,7 +88,7 @@ public:
         if (p_id == MEM_NULL) {
             return nullptr;
         }
-        boost::shared_lock lock(mutex);
+        // Get is not locked, potential data race with dealloc should be handled by the user.
         WBE_DEBUG_ASSERT(unguarded_is_in_pool(p_id));
         return reinterpret_cast<void*>(p_id);
     }
@@ -101,13 +101,13 @@ public:
 
     virtual void clear() override {
         boost::unique_lock lock(mutex);
-        WBE_HAAPIL_SET_CHUNK_HEADER(mem_chunk, HeaderType::IDLE, size);
+        WBE_HAAAPIL_SET_CHUNK_HEADER(mem_chunk, HeaderType::IDLE, size);
         possible_valid = mem_chunk;
     }
 
     virtual size_t get_allocated_data_size(MemID p_mem_id) const override {
         boost::shared_lock lock(mutex);
-        return WBE_HAAPIL_GET_HEADER_SIZE(*reinterpret_cast<Header*>((p_mem_id - WORD_SIZE)));
+        return WBE_HAAAPIL_GET_HEADER_SIZE(*reinterpret_cast<Header*>((p_mem_id - HEADER_SIZE)));
     }
 
     /**
@@ -147,6 +147,14 @@ public:
      */
     bool is_in_pool(MemID p_mem_id) const;
 
+    /**
+     * @brief Check if the pool is broken. Throws an error if the pool is broken.
+     */
+    void check_broken() const {
+        boost::shared_lock lock(mutex);
+        unguarded_check_broken();
+    }
+
 private:
 
     size_t size;
@@ -168,6 +176,8 @@ private:
         IDLE = 1,
     };
 
+    void unguarded_check_broken() const;
+
     template <bool COALESCE_ENABLED>
     MemID check_posible_free(size_t p_aligned_size, size_t p_alignment);
     template <bool COALESCE_ENABLED>
@@ -176,7 +186,6 @@ private:
     char* get_next_free_memory(char* p_from);
     void* acquire_memory(char* p_idle_chunk, char* p_mem_start, size_t p_mem_size);
     void insert_free_memory(char* p_insert_start, size_t p_insert_size);
-    void check_broken() const;
 
     void coalesce_all() const;
     void coalesce_chunk(char* p_chunk) const;
@@ -187,10 +196,10 @@ private:
 
 }
 
-#undef WBE_HAAPIL_GET_HEADER_SIZE
-#undef WBE_HAAPIL_GET_CHUNK_SIZE
-#undef WBE_HAAPIL_SET_HEADER
-#undef WBE_HAAPIL_SET_CHUNK_HEADER
+#undef WBE_HAAAPIL_GET_HEADER_SIZE
+#undef WBE_HAAAPIL_GET_CHUNK_SIZE
+#undef WBE_HAAAPIL_SET_HEADER
+#undef WBE_HAAAPIL_SET_CHUNK_HEADER
 
 
 #endif
