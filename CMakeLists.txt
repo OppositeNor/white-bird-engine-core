@@ -60,10 +60,10 @@ if (NOT MSVC)
 endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Deploy")
     ## for optimization
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -flto -DNDEBUG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -DNDEBUG")
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     ## for optimization and testing
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -flto -g -DNDEBUG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -g -DNDEBUG")
 else()
     ## for gdb or valgrind
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fno-inline -fno-omit-frame-pointer -D_DEBUG")
