@@ -2,9 +2,9 @@ name: White Bird Engine CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main", "develop" ]
 
 jobs:
   build:
@@ -89,4 +89,4 @@ jobs:
       run: python build.py -t ${{ matrix.target }}
 
     - name: Test
-      run: valgrind ${{ steps.strings.outputs.build-output-dir }}/tests/wbe_unit_test
+      run: python ./run_tests.py -t ${{ matrix.target }}
