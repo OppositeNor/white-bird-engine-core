@@ -54,7 +54,7 @@ TEST(SurfaceTest2D, TriangulationSquare) {
         {{1.0f, 1.0f}},  // Top-right
         {{0.0f, 1.0f}}   // Top-left
     };
-    TestTriangle triangles[2] = {}; // n-2 triangles for n vertices
+    TestTriangle triangles[2]; // n-2 triangles for n vertices
     
     EXPECT_NO_THROW(
         WBE::SurfaceUtils2D::triangulate(vertices, 4, triangles)

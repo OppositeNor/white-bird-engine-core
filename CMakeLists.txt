@@ -99,6 +99,9 @@ set(libs ${libs}
 )
 
 # Add engine source
+add_subdirectory(src/generated)
+set(libs ${libs} WBE_GENERATED)
+
 add_subdirectory(src/platform)
 add_subdirectory(src/core)
 add_subdirectory(src/global)

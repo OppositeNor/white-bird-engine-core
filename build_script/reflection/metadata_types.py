@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Any
 from pydantic import BaseModel, Field
 
 class WBEFieldMetadata(BaseModel):
@@ -39,11 +40,7 @@ class WBEMethodMetadata(BaseModel):
     type : list[str] = Field(default_factory=list)
     ret_type : str = ""
 
-class WBETypeMetadata(BaseModel):
-    in_header : str = ""
-    name : str = ""
-
-class WBEClassMetadata(WBETypeMetadata):
+class WBEClassMetadata(BaseModel):
     """Class metadata.
 
     Attributes: 
@@ -53,6 +50,7 @@ class WBEClassMetadata(WBETypeMetadata):
     """
     in_header : str = ""
     name : str = ""
+    extended_parents : list[Any] = Field(default_factory=list[Any])
     attribute : list[str] = Field(default_factory=list[str])
     fields : list[WBEFieldMetadata] = Field(default_factory=list[WBEFieldMetadata])
     methods : list[WBEMethodMetadata] = Field(default_factory=list[WBEMethodMetadata])
@@ -67,19 +65,6 @@ class WBELabelMetadata(BaseModel):
     attribute : list[str] = Field(default_factory=list[str])
     name : str = ""
 
-class WBEStructMetadata(WBETypeMetadata):
-    """Component metadata.
-
-    Attributes: 
-        struct_name: The name of the struct.
-        fields: The name of the fields.
-        types: The types of the fields
-    """
-    in_header : str = ""
-    name : str = ""
-    attribute : list[str] = Field(default_factory=list[str])
-    fields : list[WBEFieldMetadata] = Field(default_factory=list)
-
 class WBEFileMetadata(BaseModel):
     """Metadata in a single C++ file.
 
@@ -89,27 +74,22 @@ class WBEFileMetadata(BaseModel):
         deps: The dependencies of the file. Usually from include or import module.
         labels: The registered labels metadata.
         classes: The registered classes metadata.
-        structs: The registered structs metadata.
     """
     file_path : str = ""
     hashcode : str = ""
     deps : list[str] = Field(default_factory=list)
     labels : list[WBELabelMetadata] = Field(default_factory=list)
     classes : list[WBEClassMetadata] = Field(default_factory=list)
-    structs : list[WBEStructMetadata] = Field(default_factory=list)
 
 class WBEMetadata(BaseModel):
     """Metadata.
 
     Attributes:
-        channels: The registrated channels.
+        labels: The registrated lables.
         classes: The registrated classes.
-        structs: The registrated structs.
     """
     labels : list[WBELabelMetadata] = Field(default_factory=list[WBELabelMetadata])
     classes : list[WBEClassMetadata] = Field(default_factory=list[WBEClassMetadata])
-    structs : list[WBEStructMetadata] = Field(default_factory=list[WBEStructMetadata])
-    types : list[WBETypeMetadata] = Field(default_factory=list[WBETypeMetadata])
 
     def sort(self):
         """Sor the fields. This may gurantee the order it generates will always be the same,
@@ -118,4 +98,3 @@ class WBEMetadata(BaseModel):
         """
         self.labels = sorted(self.labels, key=lambda label: label.name)
         self.classes = sorted(self.classes, key=lambda cxx_class: cxx_class.name)
-        self.structs = sorted(self.structs, key=lambda struct: struct.name)

@@ -106,7 +106,7 @@ concept Base##Concept = std::is_base_of_v<Base<std::remove_cvref_t<T>>, std::rem
 #endif
 
 // Default alignment
-#define WBE_DEFAULT_ALIGNMENT 8 // TODO: set value according to the platform
+#define WBE_DEFAULT_ALIGNMENT 16 // TODO: set value according to the platform
 
 // Get a required optional value.
 #define WBE_REQUIRED(optional_value) WhiteBirdEngine::required(#optional_value, (optional_value))
@@ -115,5 +115,8 @@ concept Base##Concept = std::is_base_of_v<Base<std::remove_cvref_t<T>>, std::rem
 #define WBE_REQUIRES_VALID(optional_value) WhiteBirdEngine::requires_valid(#optional_value, (optional_value))
 
 #define WBE_FLOAT_TOLARENCE 0.0000001
+
+// Avoiding two atomic variables be allocated into the same cacheline, causing memory sharing.
+#define WBE_NO_FALSE_SHARING alignas(64)
 
 #endif

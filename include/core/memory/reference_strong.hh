@@ -25,7 +25,6 @@
 
 namespace WhiteBirdEngine {
 
-
 /**
  * @class Ref
  * @brief The reference to a memory resource.
@@ -295,15 +294,15 @@ private:
         MemID control_block_mem_id;
         MemID mem_id;
         AllocType* allocator;
-        std::atomic<uint32_t> weak_ref_counter;
-        std::atomic<uint32_t> strong_ref_counter;
+        WBE_NO_FALSE_SHARING std::atomic<uint32_t> weak_ref_counter;
+        WBE_NO_FALSE_SHARING std::atomic<uint32_t> strong_ref_counter;
     };
 
     void ref() const {
         if (control_block == nullptr) {
             return;
         }
-        control_block->strong_ref_counter.fetch_add(1, std::memory_order_acq_rel);
+        control_block->strong_ref_counter.fetch_add(1, std::memory_order_release);
     }
 
     void deref() const {
@@ -322,6 +321,11 @@ private:
     mutable ControlBlock* control_block;
 };
 
+template <typename T>
+concept ThisRefAsignable = requires(T* p_ins, Ref<T> p_ref) {
+    p_ins->set_ref_of_this(p_ref);
+};
+
 /**
  * @brief Make a reference with given constructor arguments.
  *
@@ -337,7 +341,11 @@ Ref<T, AllocType> make_ref(AllocType* p_allocator, Args&&... p_args) {
         throw std::runtime_error("Allocator cannot be nullptr.");
     }
     MemID id = create_obj<T>(*p_allocator, std::forward<Args>(p_args)...);
-    return Ref<T, AllocType>(p_allocator, id);
+    Ref<T, AllocType> result(p_allocator, id);
+    if constexpr (ThisRefAsignable<T>) {
+        result->set_ref_of_this(result);
+    }
+    return result;
 }
 
 }

@@ -168,10 +168,7 @@ public:
      * @return True if the reference is NULL, false otherwise.
      */
     bool is_null() const {
-        if (!is_valid()) {
-            return false;
-        }
-        return control_block->allocator == nullptr || control_block->mem_id == MEM_NULL;
+        return !(is_valid()) || control_block->allocator == nullptr || control_block->mem_id == MEM_NULL;
     }
 
 private:
@@ -181,7 +178,7 @@ private:
         if (control_block == nullptr) {
             return;
         }
-        control_block->weak_ref_counter.fetch_add(1, std::memory_order_acq_rel);
+        control_block->weak_ref_counter.fetch_add(1, std::memory_order_release);
     }
 
     void deref() const {

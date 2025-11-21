@@ -11,20 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-file(GLOB wbe_core_src ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB wbe_task_src ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-add_subdirectory(allocator)
-add_subdirectory(engine_config)
-add_subdirectory(cla)
-add_subdirectory(logging)
-add_subdirectory(profiling)
-add_subdirectory(task)
-
-add_library(WBE_CORE
+set(wbe_core_src
     ${wbe_core_src}
+    ${wbe_task_src}
+    PARENT_SCOPE
 )
 
-target_link_libraries(WBE_CORE PUBLIC
-    WBE_PLATFORM
-    ${libs}
-)
+
