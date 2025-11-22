@@ -75,10 +75,6 @@ if (WBE_MAKE_TEST AND CMAKE_CXX_COMPILER_ID STREQUAL "GCC")
     add_link_options(--coverage)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GCC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-stringop-truncation")
-endif()
-
 if (WBE_MAKE_TEST)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWBE_BUILD_TEST=OFF")
 endif()
