@@ -56,7 +56,7 @@ endif()
 
 # Set C++ build flags
 if (NOT MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic-errors")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic-errors -Wno-stringop-truncation")
 endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Deploy")
     ## for optimization
@@ -67,6 +67,12 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
 else()
     ## for gdb or valgrind
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fno-inline -fno-omit-frame-pointer -D_DEBUG")
+endif()
+
+if (WBE_MAKE_TEST AND CMAKE_CXX_COMPILER_ID STREQUAL "GCC")
+    message("Enabling coverage tests.")
+    add_compile_options(--coverage)
+    add_link_options(--coverage)
 endif()
 
 if (WBE_MAKE_TEST)
