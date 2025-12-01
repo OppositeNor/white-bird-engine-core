@@ -18,7 +18,6 @@ add_subdirectory(engine_config)
 add_subdirectory(cla)
 add_subdirectory(logging)
 add_subdirectory(profiling)
-add_subdirectory(task)
 
 add_library(WBE_CORE
     ${wbe_core_src}

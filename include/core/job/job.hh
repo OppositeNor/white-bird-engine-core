@@ -12,24 +12,20 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#ifndef __WBE_TAKS_HH__
-#define __WBE_TAKS_HH__
+#ifndef __WBE_JOB_HH__
+#define __WBE_JOB_HH__
 
 namespace WhiteBirdEngine {
 
 /**
- * @class Task
- * @brief A task that is presentable.
+ * @class Job
+ * @brief A job.
  *
  */
-struct Task {
-    Task() {}
-    virtual ~Task() {}
-
-    /**
-     * @brief Perform the task.
-     */
-    virtual void perform() = 0;
+template <typename ChildT>
+struct Job {
+    Job() {}
+    virtual ~Job() {}
 };
 
 }
