@@ -45,7 +45,9 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y valgrind
 
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+
+    - name: Setup python environment
+      uses: actions/setup-python@v5
       with:
         python-version: '3.13'
         cache: 'pip' # caching pip dependencies
@@ -58,14 +60,8 @@ jobs:
           dependencies
         key: submodules-${{ hashFiles('.gitmodules') }}
 
-    - name: Checkout submodules
-      if: steps.cache-dependencies.outputs.cache-hit != 'true'
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
-        fetch-depth: 0
-
     - name: Update submodules
+      if: steps.cache-dependencies.outputs.cache-hit != 'true'
       run: git submodule update --init --recursive
 
     - name: Set reusable strings
@@ -74,12 +70,6 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.target }}" >> "$GITHUB_OUTPUT"
-
-    - name: Install Vulkan SDK
-      uses: humbletim/install-vulkan-sdk@v1.2
-      with:
-        version: 1.4.309.0
-        cache: true
 
     - name: Setup pip dependencies
       run: pip install -r requirements.txt
@@ -91,7 +81,7 @@ jobs:
         path: |
           build/release/metadata_cache
           build/release-gcc/metadata_cache
-        key: metadata-cache
+        key: metadata-cache-${{ hashFiles('build/release/metadata_cache/*.json') }}
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
