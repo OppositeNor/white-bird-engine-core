@@ -14,16 +14,15 @@
 file(GLOB wbe_core_src ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 add_subdirectory(allocator)
-add_subdirectory(engine_config)
 add_subdirectory(cla)
+add_subdirectory(engine_config)
 add_subdirectory(logging)
 add_subdirectory(profiling)
+add_subdirectory(utils)
 
-add_library(WBE_CORE
+set(WBE_SOURCES
+    ${WBE_SOURCES}
     ${wbe_core_src}
+    PARENT_SCOPE
 )
 
-target_link_libraries(WBE_CORE PUBLIC
-    WBE_PLATFORM
-    ${libs}
-)

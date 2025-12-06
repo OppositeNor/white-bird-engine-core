@@ -13,6 +13,9 @@
 # limitations under the License.
 file(GLOB wbe_generated_src ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-add_library(WBE_GENERATED
+set(WBE_SOURCES
+    ${WBE_SOURCES}
     ${wbe_generated_src}
+    PARENT_SCOPE
 )
+

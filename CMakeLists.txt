@@ -13,24 +13,26 @@
 # limitations under the License.
 cmake_minimum_required(VERSION 3.20)
 
-project(WhiteBirdEngineCore)
-
-# Options
-option(WBE_MAKE_TEST "Export test for White Bird Engine" ON)
-set(WBE_BUILD_PLATFORM ${CMAKE_SYSTEM_NAME} CACHE STRING "Build platform.")
+project(WhiteBirdEngine)
 
 # Use C++ 20 standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 # Export compile commands
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Options
+option(WBE_MAKE_TEST "Export test for White Bird Engine" ON)
+set(WBE_BINARY_DIR ${CMAKE_BINARY_DIR}/bin CACHE STRING "The binary output directory.")
+option(WBE_BUILD_SHARED "Should build shared library" ON)
+
+
 # Define output paths
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${WBE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${WBE_BINARY_DIR}/libs)
+
 set(WBE_RESOURCE_DIR ${PROJECT_SOURCE_DIR}/res)
 set(WBE_RESOURCE_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/res)
-
-set(WBE_METADATA_OUTPUT_PATH ${WBE_RESOURCE_OUTPUT_DIR}/metadata.json)
 
 set(WBE_CONFIG_DIR ${WBE_RESOURCE_DIR}/config)
 set(WBE_CONFIG_OUTPUT_DIR ${WBE_RESOURCE_OUTPUT_DIR}/config)
@@ -38,9 +40,14 @@ set(WBE_CONFIG_OUTPUT_DIR ${WBE_RESOURCE_OUTPUT_DIR}/config)
 set(WBE_METADATA_CACHE_DIR ${CMAKE_CURRENT_BINARY_DIR}/metadata_cache)
 
 set(WBE_TEST_ENV_DIR ${PROJECT_SOURCE_DIR}/test_env)
-set(WBE_TEST_ENV_RES_DIR ${WBE_TEST_ENV_DIR}/res)
+set(WBE_BUILD_PLATFORM ${CMAKE_SYSTEM_NAME} CACHE STRING "Build platform.")
 
-set(BUILD_TESTING OFF)
+if(WBE_BUILD_SHARED)
+    set(WBE_LIB_BUILD_TYPE SHARED)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+else()
+    set(WBE_LIB_BUILD_TYPE STATIC)
+endif()
 
 set(YAML_BUILD_SHARED_LIBS OFF)
 set(YAML_CPP_BUILD_TESTS OFF)
@@ -49,31 +56,49 @@ add_subdirectory(dependencies/yaml-cpp)
 set(BUILD_TESTING OFF)
 add_subdirectory(dependencies/boost)
 if (WBE_MAKE_TEST)
+    set(BENCHMARK_ENABLE_TESTING OFF)
     add_subdirectory(dependencies/googletest)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-command-line-argument")
     add_subdirectory(dependencies/google-benchmark)
 endif()
+
 
 # Set C++ build flags
 if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic-errors")
 endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Deploy")
-    ## for optimization
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -DNDEBUG")
+    # for optimization
+    add_compile_options(-O2 -DNDEBUG)
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
-    ## for optimization and testing
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -g -DNDEBUG")
+    # for optimization and testing
+    add_compile_options(-O2 -g -DNDEBUG)
 else()
-    ## for gdb or valgrind
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fno-inline -fno-omit-frame-pointer -D_DEBUG")
+    # for gdb or valgrind
+    add_compile_options(-O0 -g -fno-inline -fno-omit-frame-pointer -D_DEBUG)
 endif()
 
 if (WBE_MAKE_TEST AND CMAKE_CXX_COMPILER_ID STREQUAL "GCC")
     message("Enabling coverage tests.")
-    add_compile_options(--coverage)
+    add_compile_options(--coverage -Wno-stringop-truncation)
     add_link_options(--coverage)
 endif()
+
+# Platform specific configurations.
+if (WBE_BUILD_PLATFORM STREQUAL "Linux")
+    add_compile_options(-DWBE_TARGET_PLATFORM_LINUX)
+    if (WBE_BUILD_SHARED)
+        set(WBE_USE_RPATH_LIBRARY ON)
+    endif()
+elseif(WBE_BUILD_PLATFORM STREQUAL "Windows")
+    add_compile_options(-DWBE_TARGET_PLATFORM_WINDOWS)
+elseif(WBE_BUILD_PLATFORM STREQUAL "Darwin")
+    add_compile_options(-DWBE_TARGET_PLATFORM_MACOS)
+    if (WBE_BUILD_SHARED)
+        set(WBE_USE_RPATH_LIBRARY ON)
+    endif()
+endif()
+
 
 if (WBE_MAKE_TEST)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWBE_BUILD_TEST=OFF")
@@ -81,7 +106,6 @@ endif()
 
 # Set include directories
 set(include_dirs 
-    ${Vulkan_INCLUDE_DIR}
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/dependencies/glm
     ${PROJECT_SOURCE_DIR}/dependencies/json/single_include
@@ -97,7 +121,9 @@ if (WBE_MAKE_TEST)
     )
 endif()
 
-include_directories(${include_dirs})
+include_directories(
+    ${include_dirs}
+)
 
 set(libs ${libs}
     yaml-cpp::yaml-cpp
@@ -105,40 +131,29 @@ set(libs ${libs}
 )
 
 # Add engine source
-add_subdirectory(src/generated)
-set(libs ${libs} WBE_GENERATED)
-
+set(WBE_SOURCES "")
 add_subdirectory(src/platform)
 add_subdirectory(src/core)
 add_subdirectory(src/global)
+add_subdirectory(src/generated)
 
-add_library(WhiteBirdEngine::Platform ALIAS WBE_PLATFORM)
-add_library(WhiteBirdEngine::Core ALIAS WBE_CORE)
-add_library(WhiteBirdEngine::Global ALIAS WBE_GLOBAL)
+add_library(WBE_ENGINE ${WBE_LIB_BUILD_TYPE}
+    ${WBE_SOURCES}
+)
+add_library(WBE::Engine ALIAS WBE_ENGINE)
+
+target_link_libraries(WBE_ENGINE PUBLIC
+    ${libs}
+)
+
+set(libs ${libs}
+    WBE_ENGINE
+)
 
 # Generate test executables
-set(WBE_TEST_EXE "")
 if (WBE_MAKE_TEST)
     # Export tests
     add_subdirectory(tests)
 endif()
 
-# Run all tests
-if (WBE_MAKE_TEST)
-    add_custom_target(wbe_run_tests
-        COMMENT "Running White Bird Engine tests..."
-        COMMAND python3 ${PROJECT_SOURCE_DIR}/test_script/run_tests.py ${WBE_TEST_EXE}
-    )
 
-    add_custom_target(wbe_setup_test_env
-        COMMENT "Setting up test_env..."
-        COMMAND ${CMAKE_COMMAND} -E copy
-            "${WBE_METADATA_OUTPUT_PATH}"
-            "${WBE_TEST_ENV_RES_DIR}"
-    )
-
-endif()
-
-if (WBE_MAKE_TEST)
-    add_dependencies(wbe_run_tests wbe_setup_test_env)
-endif()

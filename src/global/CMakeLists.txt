@@ -13,10 +13,8 @@
 # limitations under the License.
 file(GLOB wbe_global_src ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-add_library(WBE_GLOBAL
+set(WBE_SOURCES
+    ${WBE_SOURCES}
     ${wbe_global_src}
-)
-
-target_link_libraries(WBE_GLOBAL
-    WBE_CORE
+    PARENT_SCOPE
 )

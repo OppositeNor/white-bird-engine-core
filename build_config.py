@@ -17,6 +17,7 @@ target_info = {
         "cpp-compiler" : "clang++",
         "export-directory" : "debug",
         "cmake-build-type" : "Debug",
+        "build-shared" : True,
         "generate-tests" : True,
     },
     "release" : {
@@ -24,6 +25,7 @@ target_info = {
         "cpp-compiler" : "clang++",
         "export-directory" : "release",
         "cmake-build-type" : "Release",
+        "build-shared" : True,
         # "generator" : "Ninja",
         "generate-tests" : True,
     },
@@ -32,6 +34,7 @@ target_info = {
         "cpp-compiler" : "clang++",
         "export-directory" : "deploy",
         "cmake-build-type" : "Deploy",
+        "build-shared" : True,
         "generator" : "Ninja",
         "generate-tests" : False,
     },
@@ -39,6 +42,7 @@ target_info = {
         "c-compiler" : "gcc",
         "cpp-compiler" : "g++",
         "export-directory" : "debug-gcc",
+        "build-shared" : True,
         "cmake-build-type" : "Debug",
         "generate-tests" : True,
     },
@@ -47,6 +51,7 @@ target_info = {
         "cpp-compiler" : "g++",
         "export-directory" : "release-gcc",
         "cmake-build-type" : "Release",
+        "build-shared" : True,
         "generator" : "Ninja",
         "generate-tests" : True,
     },
@@ -55,6 +60,7 @@ target_info = {
         "cpp-compiler" : "g++",
         "export-directory" : "deploy-gcc",
         "cmake-build-type" : "Deploy",
+        "build-shared" : True,
         "generator" : "Ninja",
         "generate-tests" : False,
     },
@@ -79,6 +85,10 @@ gen_info = {
         "WBE_CHANNEL",
         "WBE_RENDER_OBJECT_TYPE",
         "WBE_RENDER_TASK",
+        "WBE_RESOURCE_UNIT",
+    ],
+    "static_serializables" : [
+        "WBE_SERIALIZABLE_STATIC",
     ],
     "serializables" : [
         "WBE_SERIALIZABLE",
@@ -86,3 +96,5 @@ gen_info = {
         "WBE_CONFIG_OPTION"
     ],
 }
+
+gen_info["static_serializables"].extend(gen_info["serializables"])

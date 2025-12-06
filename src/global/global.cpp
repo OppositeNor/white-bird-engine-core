@@ -14,7 +14,6 @@
 */
 #include "global/global.hh"
 #include "core/engine_core.hh"
-#include "platform/os/os.hh"
 
 namespace WhiteBirdEngine {
 
@@ -33,7 +32,6 @@ Global::Global(int p_argc, char* p_argv[], const Directory& p_root_dir)
 Global::~Global() {
     delete engine_core;
     singleton = nullptr;
-    OS::wait_all();
 }
 
 

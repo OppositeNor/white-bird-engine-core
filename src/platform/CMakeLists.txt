@@ -25,10 +25,9 @@ endif()
 
 add_subdirectory(file_system)
 
-add_library(WBE_PLATFORM
+set(WBE_SOURCES
+    ${WBE_SOURCES}
     ${wbe_platform_src}
+    PARENT_SCOPE
 )
 
-target_link_libraries(WBE_PLATFORM PUBLIC
-    ${libs}
-)

@@ -11,16 +11,42 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 file(GLOB_RECURSE WBE_UNIT_TEST_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/unit/*.cpp)
 
 add_executable(wbe_unit_test
     ${WBE_UNIT_TEST_SOURCE}
 )
 
-target_link_libraries(wbe_unit_test PUBLIC
-    WBE_PLATFORM
-    WBE_CORE
-    WBE_GLOBAL
+target_link_libraries(wbe_unit_test PRIVATE
+    WBE_ENGINE
     gtest_main
 )
 
+file(GLOB_RECURSE WBE_UNIT_TEST_BENCHMARK ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/*.cpp)
+
+add_executable(wbe_benchmark_test
+    ${WBE_UNIT_TEST_BENCHMARK}
+)
+
+target_link_libraries(wbe_benchmark_test PRIVATE
+    WBE_ENGINE
+    benchmark_main
+)
+
+if (WBE_USE_RPATH_LIBRARY)
+    set_target_properties(wbe_unit_test PROPERTIES
+        BUILD_WITH_INSTALL_RPATH TRUE
+        INSTALL_RPATH "$ORIGIN/libs"
+        SKIP_BUILD_RPATH FALSE
+    )
+    set_target_properties(wbe_benchmark_test PROPERTIES
+        BUILD_WITH_INSTALL_RPATH TRUE
+        INSTALL_RPATH "$ORIGIN/libs"
+        SKIP_BUILD_RPATH FALSE
+    )
+endif()
+
+include(GoogleTest)
+
+gtest_discover_tests(wbe_unit_test)
