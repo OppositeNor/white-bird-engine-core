@@ -1,7 +1,11 @@
 import os
 import subprocess
-from build_setup import build_dir
+from build_setup import binary_dir
 
-run_script = ["valgrind", "--error-exitcode=42", str(os.path.join(build_dir, 'tests/wbe_unit_test'))]
+run_command = ['valgrind',
+              '--leak-check=full',
+              '--show-leak-kinds=all',
+              '--error-exitcode=42',
+              str(os.path.join(binary_dir, 'wbe_unit_test'))]
 
-subprocess.run(run_script)
+exit(subprocess.run(run_command).returncode)
