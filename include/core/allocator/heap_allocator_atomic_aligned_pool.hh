@@ -17,6 +17,7 @@
 
 #include "core/allocator/allocator.hh"
 #include "core/allocator/heap_allocator_aligned.hh"
+#include "utils/defs.hh"
 #include <boost/thread/lock_types.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <limits>
@@ -45,14 +46,10 @@ struct AllocatorTrait<class HeapAllocatorAtomicAlignedPool> final : public Alloc
  */
 class HeapAllocatorAtomicAlignedPool final : public HeapAllocatorAligned {
 public:
-public:
     HeapAllocatorAtomicAlignedPool()
         : HeapAllocatorAtomicAlignedPool(WBE_KiB(64)) {}
     virtual ~HeapAllocatorAtomicAlignedPool() override;
-    HeapAllocatorAtomicAlignedPool(const HeapAllocatorAtomicAlignedPool&) = delete;
-    HeapAllocatorAtomicAlignedPool(HeapAllocatorAtomicAlignedPool&&) = delete;
-    HeapAllocatorAtomicAlignedPool& operator=(const HeapAllocatorAtomicAlignedPool&) = delete;
-    HeapAllocatorAtomicAlignedPool& operator=(HeapAllocatorAtomicAlignedPool&&) = delete;
+    WBE_R6_NDCD_DELETE_COPY_MOVE(HeapAllocatorAtomicAlignedPool)
 
     using Header = uint64_t;
 
@@ -89,7 +86,7 @@ public:
 
     virtual bool is_empty() const override {
         boost::shared_lock lock(mutex);
-        return idle_list_head != nullptr && idle_list_head->size == size;
+        return is_empty_unguarded();
     }
 
     virtual void clear() override {
@@ -134,7 +131,11 @@ public:
 
 private:
 
-    struct IdleListNode {
+    bool is_empty_unguarded() const {
+        return idle_list_head != nullptr && idle_list_head->size == size;
+    }
+
+    struct IdleListNode { // NOLINT
         size_t size;
         char* mem_start;
         std::unique_ptr<IdleListNode> next = nullptr;
@@ -156,6 +157,6 @@ private:
     mutable boost::shared_mutex mutex;
 };
 
-}
+} // namespace WhiteBirdEngine
 
 #endif

@@ -12,21 +12,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#include "core/cla/cla_ast.hh"
-#include "core/cla/cla_ast_visitor.hh"
-
-namespace WhiteBirdEngine {
-
-void CLAASTNodeRoot::accept(CLAASTVisitor* p_cla_ast_visitor) {
-    p_cla_ast_visitor->visit(this);
-}
-
-void CLAASTNodeRootOperand::accept(CLAASTVisitor* p_cla_ast_visitor) {
-    p_cla_ast_visitor->visit(this);
-}
-
-void CLAASTNodeOperation::accept(CLAASTVisitor* p_cla_ast_visitor) {
-    p_cla_ast_visitor->visit(this);
-}
-
-} // namespace WhiteBirdEngine
+#if defined(WBE_TARGET_PLATFORM_LINUX)
+#include "linux_file_system_test.hh"
+#elif defined(WBE_TARGET_PLATFORM_MACOS)
+#include "macos_file_system_test.hh"
+#elif defined(WBE_TARGET_PLATFORM_WINDOWS)
+#include "windows_file_system_test.hh"
+#endif

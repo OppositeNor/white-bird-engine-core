@@ -34,18 +34,22 @@ struct WBE_META(WBE_SERIALIZABLE_STATIC) Vertex3D {
     /**
      * @brief The position of the vertex.
      */
+    WBE_META(WBE_REFLECT)
     glm::vec3 position;
     /**
      * @brief The normal of the vertex.
      */
+    WBE_META(WBE_REFLECT)
     glm::vec3 normal;
     /**
      * @brief The tanglent vector of the vertex.
      */
+    WBE_META(WBE_REFLECT)
     glm::vec3 tangent;
     /**
      * @brief The bitangent vector of the vertex.
      */
+    WBE_META(WBE_REFLECT)
     glm::vec3 bitangent;
 };
 
@@ -84,12 +88,12 @@ struct WBE_META(WBE_SERIALIZABLE_STATIC) Vertex3DTextured : public Vertex3D {
  *
  * @tparam TVertType The type of the vertices.
  */
-template <typename TVertType, typename AllocatorType = Allocator>
+template <typename TVertType>
 struct Triangle3DIndx {
     /**
      * @brief The vertex array.
      */
-    RefRaw<TVertType, AllocatorType> vert_array;
+    RefRaw<TVertType, Allocator> vert_array;
     struct Indices {
         uint32_t vert_1;
         uint32_t vert_2;
@@ -109,6 +113,6 @@ struct Triangle3DIndx {
 };
 
 using Triangle3DIndxTextured = Triangle3DIndx<Vertex3DTextured>;
-}
+} // namespace WhiteBirdEngine
 
 #endif

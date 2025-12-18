@@ -18,6 +18,7 @@
 #include "core/engine_core.hh"
 #include "core/memory/unique.hh"
 #include "platform/file_system/directory.hh"
+#include "utils/defs.hh"
 #include "utils/interface/singleton.hh"
 
 namespace WhiteBirdEngine {
@@ -26,9 +27,12 @@ namespace WhiteBirdEngine {
  * @brief Global class. Stores all the global objects.
  * Terminate and then reinitialize it should result in restarting the game/engine.
  */
-class Global : public Singleton<Global> {
+class Global final : public Singleton<Global> {
 public:
-    ~Global();
+    Global() = delete;
+    virtual ~Global() override;
+    WBE_R6_NDCD_DELETE_COPY_MOVE(Global);
+
 
     /**
      * @brief Constructor.
@@ -65,7 +69,7 @@ private:
     inline static Global* singleton;
 };
 
-}
+} // namespace WhiteBirdEngine
 
 
 #endif
