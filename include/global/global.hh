@@ -16,7 +16,6 @@
 #define __WBE_GLOBAL_HH__
 
 #include "core/engine_core.hh"
-#include "core/memory/unique.hh"
 #include "platform/file_system/directory.hh"
 #include "utils/defs.hh"
 #include "utils/interface/singleton.hh"
@@ -31,7 +30,7 @@ class Global final : public Singleton<Global> {
 public:
     Global() = delete;
     virtual ~Global() override;
-    WBE_R6_NDCD_DELETE_COPY_MOVE(Global);
+    WBE_R6_NDCD_DELETE_COPY_MOVE(Global)
 
 
     /**
