@@ -35,6 +35,7 @@ Checks: >
   -misc-no-recursion,
   -misc-const-correctness,
   -misc-use-anonymous-namespace,
+  -misc-confusable-identifiers,
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-avoid-do-while,
@@ -54,6 +55,7 @@ Checks: >
   -hicpp-no-array-decay,
   -hicpp-signed-bitwise,
   -hicpp-use-auto,
+  -hicpp-move-const-arg,
   -modernize-use-trailing-return-type,
   -modernize-use-nodiscard,
   -modernize-use-override,
@@ -219,7 +221,7 @@ CheckOptions:
   - key: readability-function-size.ParameterThreshold
     value: 8
   
-  # Header guard format based on observed pattern: __WBE_FILENAME_HH__
+  # Header guard format based on observed pattern: WBE_FILE_{FILENAME}_HH
   - key: llvm-header-guard.HeaderFileExtensions
     value: "h,hh,hpp,hxx"
   

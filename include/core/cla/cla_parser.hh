@@ -12,8 +12,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#ifndef __WBE_CLA_PARSER_HH__
-#define __WBE_CLA_PARSER_HH__
+#ifndef WBE_FILE_CLA_PARSER_HH
+#define WBE_FILE_CLA_PARSER_HH
 
 #include "core/allocator/allocator.hh"
 #include "core/cla/cla_ast.hh"
@@ -34,7 +34,7 @@ class EngineConfig;
 class CLAParser {
 public:
     CLAParser() = default;
-    ~CLAParser() {}
+    ~CLAParser() = default;
     CLAParser(const CLAParser&) = default;
     CLAParser(CLAParser&&) = default;
     CLAParser& operator=(const CLAParser&) = default;
@@ -55,7 +55,7 @@ private:
         GET_ROOT_OPERAND,
         GET_OPTION,
         GET_OPERAND
-    } parse_state;
+    } parse_state = ParseState::START;
 
     Ref<CLAASTNodeOperation> curr_option = MEM_NULL;
 
@@ -66,6 +66,6 @@ private:
     void parse_get_operand(const CLAToken& p_token, std::string& p_utility_name, std::vector<Ref<CLAASTNode>>& p_operations);
 };
 
-}
+} // namespace WhiteBirdEngine
 
 #endif

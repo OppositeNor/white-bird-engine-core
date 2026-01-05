@@ -12,12 +12,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#ifndef __WBE_3D_PRIMITIVE_HH__
-#define __WBE_3D_PRIMITIVE_HH__
+#ifndef WBE_FILE_3D_PRIMITIVE_HH
+#define WBE_FILE_3D_PRIMITIVE_HH
 
 #include "core/allocator/allocator.hh"
 #include "core/memory/reference_raw.hh"
-#include "primitive_slots.hh"
 #include "core/reflection/reflection_defs.hh"
 #include <cstdint>
 #include <glm/glm.hpp>
@@ -78,8 +77,32 @@ struct Triangle3D {
 /**
  * @brief Textured vertex.
  */
-struct WBE_META(WBE_SERIALIZABLE_STATIC) Vertex3DTextured : public Vertex3D {
-    WBE_VERT_SLOT_TEXTURED
+struct WBE_META(WBE_SERIALIZABLE_STATIC) Vertex3DTextured {
+    /**
+     * @brief The position of the vertex.
+     */
+    WBE_META(WBE_REFLECT)
+    glm::vec3 position;
+    /**
+     * @brief The normal of the vertex.
+     */
+    WBE_META(WBE_REFLECT)
+    glm::vec3 normal;
+    /**
+     * @brief The tanglent vector of the vertex.
+     */
+    WBE_META(WBE_REFLECT)
+    glm::vec3 tangent;
+    /**
+     * @brief The bitangent vector of the vertex.
+     */
+    WBE_META(WBE_REFLECT)
+    glm::vec3 bitangent;
+    /**
+     * @brief The uv value.
+     */
+    WBE_META(WBE_REFLECT)
+    glm::vec2 uv;
 };
 
 /**

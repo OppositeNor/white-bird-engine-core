@@ -1,0 +1,16 @@
+{
+    "include": [],
+    "resources": [
+        {
+            "id": "draw_triangle_vert",
+            "type": "binary",
+            "path": "assets/shaders/draw_triangle/draw_triangle_vert.spv"
+        },
+        {
+            "id": "draw_triangle_frag",
+            "type": "binary",
+            "path": "assets/shaders/draw_triangle/draw_triangle_frag.spv"
+        }
+    ]
+}
+
