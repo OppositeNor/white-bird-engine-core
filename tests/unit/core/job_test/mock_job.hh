@@ -8,39 +8,32 @@
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
+
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#ifndef WBE_FILE_JOB_HH
-#define WBE_FILE_JOB_HH
+#ifndef WBE_FILE_MOCK_JOB_HH
+#define WBE_FILE_MOCK_JOB_HH
 
-namespace WhiteBirdEngine {
+#include "core/job/job.hh"
+#include <atomic>
 
-/**
- * @class Job
- * @brief A job.
- *
- */
-template <typename ChildT>
-struct Job {
-    Job() = default;
-    virtual ~Job() = default;
-    Job(const Job&) = default;
-    Job(Job&&) = default;
-    Job& operator=(const Job&) = default;
-    Job& operator=(Job&&) = default;
+namespace WBE = WhiteBirdEngine;
 
-    /**
-     * @brief Get this job instance with the child type.
-     *
-     * @return The instance with the child type.
-     */
-    ChildT* get() {
-        return static_cast<ChildT*>(this);
+// Mock job for testing
+class MockJob : public WBE::Job<MockJob> {
+public:
+    MockJob(int id = 0) : job_id(id), performed(false) {}
+    
+    void perform() {
+        performed = true;
+        perform_count.fetch_add(1);
     }
+    
+    int job_id;
+    bool performed;
+    inline static std::atomic<int> perform_count;
 };
 
-} // namespace WhiteBirdEngine
-
-#endif
+#endif // WBE_FILE_MOCK_JOB_HH

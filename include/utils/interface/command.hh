@@ -12,8 +12,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#ifndef __WBE_COMMAND_HH__
-#define __WBE_COMMAND_HH__
+#ifndef WBE_FILE_COMMAND_HH
+#define WBE_FILE_COMMAND_HH
+
+#include "utils/defs.hh"
 
 #include <cstdint>
 #include <string>
@@ -28,8 +30,7 @@ using CommandID = uint64_t;
  */
 class Command {
 public:
-    Command() = default;
-    virtual ~Command() {}
+    WBE_R6_DEFAULT_VIRTUAL(Command)
 
     /**
      * @brief Invoke an operation.
@@ -54,6 +55,6 @@ public:
     virtual void deserialize(const std::string& p_str) = 0;
 };
 
-}
+} // namespace WhiteBirdEngine
 
 #endif

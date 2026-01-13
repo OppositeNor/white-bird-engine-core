@@ -12,8 +12,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#ifndef __WBE_UTILS_HH__
-#define __WBE_UTILS_HH__
+#ifndef WBE_FILE_UTILS_HH
+#define WBE_FILE_UTILS_HH
 
 #include "utils/defs.hh"
 #include <cstddef>
@@ -350,6 +350,28 @@ struct Buffer : public BufferBase<Buffer<SIZE>> {
     // The buffer.
     char buffer[SIZE];
 };
+
+/**
+ * @brief Increment an index on a ring.
+ *
+ * @param p_i The index to increment.
+ * @param p_ring_size The size of the ring.
+ * @return The incremented index.
+ */
+constexpr size_t ring_increment(size_t p_i, size_t p_ring_size) {
+    return ((p_i) + 1) % p_ring_size;
+}
+
+/**
+ * @brief Decrement an index on a ring.
+ *
+ * @param p_i The index to decrement.
+ * @param p_ring_size The size of the ring.
+ * @return The decremented index.
+ */
+constexpr size_t ring_decrement(size_t p_i, size_t p_ring_size) {
+    return ((p_i + p_ring_size) - 1) % p_ring_size;
+}
 
 WBE_DECL_CRTP_CONCEPT(BufferBase);
 
