@@ -13,13 +13,15 @@
    limitations under the License.
 */
 #include "core/allocator/heap_allocator_ram.hh"
-#include "core/allocator/allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/logging/log.hh"
+#include <cstddef>
+#include <stdexcept>
 
 namespace WhiteBirdEngine {
 
 HeapAllocatorRAM::~HeapAllocatorRAM() {
-    if (allocated.size() != 0) {
+    if (!allocated.empty()) {
         stdout_log(WBE_CHANNEL_GLOBAL)->warning("HeapAllocatorRAM not empty during destruction.");
     }
     for (const auto& iter : allocated) {
@@ -31,7 +33,7 @@ MemID HeapAllocatorRAM::allocate(size_t p_size) {
     if (p_size == 0) {
         return MEM_NULL;
     }
-    MemID result = std::bit_cast<MemID>(malloc(p_size)); // NOLINT
+    MemID result = reinterpret_cast<MemID>(malloc(p_size)); // NOLINT
     allocated.insert(result);
     return result;
 }

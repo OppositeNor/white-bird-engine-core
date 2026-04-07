@@ -16,6 +16,7 @@
 #define WBE_FILE_LOG_HH
 
 #include "core/reflection/reflection_defs.hh"
+#include "utils/defs.hh"
 #include "utils/utils.hh"
 #include <string>
 namespace WhiteBirdEngine {
@@ -26,10 +27,10 @@ WBE_LABEL(WBE_CHANNEL_GLOBAL, WBE_CHANNEL)
 WBE_LABEL(WBE_CHANNEL_USER, WBE_CHANNEL)
 WBE_LABEL(WBE_CHANNEL_DEBUG, WBE_CHANNEL)
 
-class Log {
+class ILog {
 public:
 
-    WBE_R6_DEFAULT_VIRTUAL(Log)
+    WBE_R6_DEFAULT_VIRTUAL(ILog)
 
     /**
      * @brief Get the channel of the log.
@@ -60,7 +61,7 @@ public:
     virtual void error(const std::string& p_str) = 0;
 };
 
-Log* stdout_log(ChannelID p_channel = WBE_CHANNEL_GLOBAL);
+ILog* stdout_log(ChannelID p_channel = WBE_CHANNEL_GLOBAL);
 
 } // namespace WhiteBirdEngine
 

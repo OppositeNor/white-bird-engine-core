@@ -16,8 +16,9 @@
 #define WBE_FILE_PROFILLING_MANAGER_HH
 
 #include "core/engine_core.hh"
-#include "utils/interface/singleton.hh"
+#include "utils/interface/i_singleton.hh"
 #include "utils/utils.hh"
+#include <cstdint>
 #include <shared_mutex>
 #include <sstream>
 #include <string>
@@ -31,7 +32,7 @@ namespace WhiteBirdEngine {
  * @brief The manager for all the profilers.
  *
  */
-class ProfilingManager : public Singleton<ProfilingManager> {
+class ProfilingManager : public ISingleton<ProfilingManager> {
 public:
     ProfilingManager() = default;
     virtual ~ProfilingManager() override = default;

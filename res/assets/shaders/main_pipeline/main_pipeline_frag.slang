@@ -1,4 +1,4 @@
-// frag
+// fragment
 /* Copyright 2025 OppositeNor
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#include "draw_triangle/draw_triangle_utils.hlslh"
+#include "main_pipeline/main_pipeline_utils.slangh"
 
-float4 main(VSOutput p_input) : SV_Target {
+float4 main(VSOutput p_input) : SV_Target0 {
     return float4(p_input.uv, 0.0, 1.0);
 }
 

@@ -55,7 +55,6 @@ def _get_cmake_command_from_info(build_info):
 def _gather_license():
     # Get white bird engine license
     shutil.copyfile(os.path.join(build_setup.root_dir, "LICENSE"), os.path.join(build_setup.licenses_output_dir, "white-bird-engine_LICENSE"))
-    shutil.copyfile(os.path.join(build_setup.root_dir, "NOTICE"), os.path.join(build_setup.licenses_output_dir, "white-bird-engine_NOTICE"))
     # Get licenses from dependencies
     deps_dir = Path(build_setup.dependencies_dir).resolve()
     output_dir = Path(build_setup.licenses_output_dir).resolve()
@@ -87,7 +86,7 @@ def _gather_license():
 
 def _gather_gen_infos():
     gen_infos = []
-    for gen_info_file in build_setup.gen_info_files:
+    for gen_info_file in build_config.gen_info_files:
         with open(gen_info_file) as f:
             data = json.load(f)
         file_infos = [WBEGenFileInfo(**info) for info in data]
@@ -111,9 +110,9 @@ if __name__ == "__main__":
         _gather_license()
         print("WBEBuilder: Gathering sources...")
         if build_setup.build_target["generate-tests"]:
-            sources = [source for source in build_setup.project_files if Path(source).suffix in build_config.source_extensions]
+            sources = [source for source in build_config.project_files if Path(source).suffix in build_config.source_extensions]
         else:
-            sources = [source for source in build_setup.project_files_exclude_tests if Path(source).suffix in build_config.source_extensions]
+            sources = [source for source in build_config.project_files_exclude_tests if Path(source).suffix in build_config.source_extensions]
         print("WBEBuilder: Gathering generate.json...")
         gen_infos = _gather_gen_infos()
 

@@ -3,7 +3,8 @@
         "assets/meshes/cube.json",
         "assets/meshes/triangle.json",
         "assets/shaders/main_pipeline/main_pipeline_shader.json",
-        "assets/shaders/draw_triangle/draw_triangle_shader.json"
+        "assets/shaders/draw_triangle/draw_triangle_shader.json",
+        "assets/shaders/draw_cube/draw_cube_shader.json"
     ],
     "resources": [
         {
@@ -28,11 +29,16 @@
                 },
                 "roughness_metallic_ao": {
                     "type": "image",
-                    "path": "assets/images/default_rma.png",
+                    "path": "assets/images/default_rmo.png",
                     "color_space": "rgb",
                     "channel_count": 3
                 }
             }
+        },
+        {
+            "id": "test_text",
+            "type": "text",
+            "path": "test_text_files/test_file_utf8.txt"
         }
     ]
 }

@@ -1,4 +1,4 @@
-// vert
+// vertex
 /* Copyright 2025 OppositeNor
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,26 +13,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#include "main_pipeline/main_pipeline_utils.hlslh"
+#include "draw_cube/draw_cube_utils.slangh"
+#include "defs.slangh"
 
-VSOutput main(uint p_vertex_id : SV_VertexID) {
+[[vk::binding(0, 0)]] ConstantBuffer<CameraInfo> camera_info;
+
+VSOutput main(Vertex3DTexturedInput p_input) {
     VSOutput output;
-
-    float2 positions[3] = {
-        float2(-1.0, -1.0),
-        float2(-1.0,  3.0),
-        float2( 3.0, -1.0)
-    };
-
-    float2 uvs[3] = {
-        float2(0.0, 0.0),
-        float2(0.0, 2.0),
-        float2(2.0, 0.0)
-    };
-
-    output.position = float4(positions[p_vertex_id], 0.0, 1.0);
-    output.uv       = uvs[p_vertex_id];
+    float4 pos = float4(p_input.position.xyz, 1.0);
+    output.position = mul(camera_info.proj, mul(camera_info.view, pos));
+    output.normal = p_input.normal;
+    output.uv = p_input.uv;
 
     return output;
 }
+
 

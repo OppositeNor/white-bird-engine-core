@@ -16,6 +16,7 @@
 #define WBE_FILE_UTILS_HH
 
 #include "utils/defs.hh"
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -82,6 +83,26 @@ constexpr HashCode dynam_hash(const char* p_str) {
     return *p_str ? static_cast<uint32_t>(*p_str) + 33 * dynam_hash(p_str + 1) : 5381;
 }
 
+/**
+ * @brief Hash a int32_t in compile time.
+ *
+ * @param p_val The value to hash.
+ * @return The hash code of the value.
+ */
+consteval HashCode static_hash(int32_t p_val) {
+    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3b;
+    p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3b;
+    p_val = (p_val >> 16) ^ p_val;
+    return p_val;
+}
+
+/**
+ * @brief Hash a int32_t.
+ *
+ * @param p_val The value to hash.
+ * @return The hash code of the value.
+ */
 constexpr HashCode dynam_hash(int32_t p_val) {
     // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
     p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3b;
@@ -90,11 +111,87 @@ constexpr HashCode dynam_hash(int32_t p_val) {
     return p_val;
 }
 
-constexpr HashCode dynam_hash(size_t p_val) {
+/**
+ * @brief Hash a uint32_t in compile time.
+ *
+ * @param p_val The value to hash.
+ * @return The hash code of the value.
+ */
+consteval HashCode static_hash(uint32_t p_val) {
     // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
-    p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3b;
-    p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3b;
+    p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3bU;
+    p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3bU;
     p_val = (p_val >> 16) ^ p_val;
+    return p_val;
+}
+
+/**
+ * @brief Hash a uint32_t.
+ *
+ * @param p_val The value to hash.
+ * @return The hash code of the value.
+ */
+constexpr HashCode dynam_hash(uint32_t p_val) {
+    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3bU;
+    p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3bU;
+    p_val = (p_val >> 16) ^ p_val;
+    return p_val;
+}
+
+/**
+ * @brief Hash a int64_t in compile time.
+ *
+ * @param p_val The value to hash.
+ * @return The hash code of the value.
+ */
+consteval HashCode static_hash(int64_t p_val) {
+    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    p_val = (p_val ^ (p_val >> 30)) * 0xbf58476d1ce4e5b9LL; // NOLINT
+    p_val = (p_val ^ (p_val >> 27)) * 0x94d049bb133111ebLL; // NOLINT
+    p_val = p_val ^ (p_val >> 31);
+    return p_val;
+}
+
+/**
+ * @brief Hash a int64_t.
+ *
+ * @param p_val The value to hash.
+ * @return The hash code of the value.
+ */
+constexpr HashCode dynam_hash(int64_t p_val) {
+    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    p_val = (p_val ^ (p_val >> 30)) * 0xbf58476d1ce4e5b9LL; // NOLINT
+    p_val = (p_val ^ (p_val >> 27)) * 0x94d049bb133111ebLL; // NOLINT
+    p_val = p_val ^ (p_val >> 31);
+    return p_val;
+}
+
+/**
+ * @brief Hash a uint64_t in compile time.
+ *
+ * @param p_val The value to hash.
+ * @return The hash code of the value.
+ */
+consteval HashCode static_hash(uint64_t p_val) {
+    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    p_val = (p_val ^ (p_val >> 30)) * 0xbf58476d1ce4e5b9ULL;
+    p_val = (p_val ^ (p_val >> 27)) * 0x94d049bb133111ebULL;
+    p_val = p_val ^ (p_val >> 31);
+    return p_val;
+}
+
+/**
+ * @brief Hash a uint64_t.
+ *
+ * @param p_val The value to hash.
+ * @return The hash code of the value.
+ */
+constexpr HashCode dynam_hash(uint64_t p_val) {
+    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    p_val = (p_val ^ (p_val >> 30)) * 0xbf58476d1ce4e5b9ULL;
+    p_val = (p_val ^ (p_val >> 27)) * 0x94d049bb133111ebULL;
+    p_val = p_val ^ (p_val >> 31);
     return p_val;
 }
 
@@ -147,7 +244,7 @@ inline std::vector<std::string> split_string(std::string p_str, char p_token) {
  * @return The index of the token that is first found.
  */
 inline size_t find_first_pos(const std::string& p_str, const std::string& p_tokens) {
-    if (p_tokens.size() == 0) {
+    if (p_tokens.empty()) {
         return std::string::npos;
     }
     size_t min_pos = std::numeric_limits<size_t>::infinity();
@@ -217,10 +314,12 @@ inline std::string load_text_file(const char* p_path, EncodeType p_encode_type =
     if (!file_stream.is_open()) {
         throw std::runtime_error("Failed to open text file at path: " + std::string(p_path));
     }
-    std::string line;
-    while (!file_stream.eof()) {
-        std::getline(file_stream, line);
-        content.append(line + "\n");
+    file_stream.seekg(0, std::ios::end);
+    size_t size = file_stream.tellg();
+    file_stream.seekg(0, std::ios::beg);
+    content.resize(size);
+    if (!file_stream.read(content.data(), static_cast<std::streamsize>(size))) {
+        throw std::runtime_error("Failed to read text file at path: " + std::string(p_path));
     }
     return content;
 }
@@ -248,6 +347,58 @@ inline std::vector<char> load_binary_file(const char* p_path) {
 }
 
 /**
+ * @brief Load a binary file from a path.
+ *
+ * @todo Test
+ * @param p_path The path tot he binary file.
+ * @param p_result The result data. Set to nullptr if only interested with file size.
+ * @param p_size The size of the file. Ignored if p_result is not nullptr.
+ */
+inline void load_binary_file(const char* p_path, void* p_result, size_t* p_size) {
+    if (p_path == nullptr) {
+        throw std::invalid_argument("Path to binary file cannot be null.");
+    }
+    if (p_result == nullptr && p_size == nullptr) {
+        throw std::invalid_argument("Either p_result or p_size must be provided.");
+    }
+
+    std::ifstream file_stream(p_path, std::ios::binary | std::ios::ate);
+    if (!file_stream.is_open()) {
+        throw std::runtime_error("Failed to open file at path: " + std::string(p_path));
+    }
+
+    const std::ifstream::pos_type end_pos = file_stream.tellg();
+    if (end_pos < 0) {
+        throw std::runtime_error("Failed to get file size at path: " + std::string(p_path));
+    }
+
+    const size_t size = static_cast<size_t>(end_pos);
+
+    // Query mode: caller only needs file size.
+    if (p_result == nullptr) {
+        *p_size = size;
+        return;
+    }
+
+    if (size > static_cast<size_t>(std::numeric_limits<std::streamsize>::max())) {
+        throw std::runtime_error("File is too large to read at path: " + std::string(p_path));
+    }
+
+    file_stream.seekg(0, std::ios::beg);
+    if (!file_stream.good()) {
+        throw std::runtime_error("Failed to seek file at path: " + std::string(p_path));
+    }
+
+    if (size == 0) {
+        return;
+    }
+
+    if (!file_stream.read(static_cast<char*>(p_result), static_cast<std::streamsize>(size))) {
+        throw std::runtime_error("Failed to read file at path: " + std::string(p_path));
+    }
+}
+
+/**
  * @brief Remove hashtag comments.
  * @todo Test
  *
@@ -255,13 +406,35 @@ inline std::vector<char> load_binary_file(const char* p_path) {
  * @return The string that all the hashtag comments that are all removed.
  */
 inline std::string remove_hashtag_comments(std::string p_str) {
-    while (p_str.find('#') != std::string::npos) {
+    while (p_str.contains('#')) {
         size_t pos = p_str.find('#');
         size_t end = p_str.find('\n', pos);
         p_str.erase(pos, end - pos);
     }
     return p_str;
 }
+
+/**
+ * @brief Hash a pointer in compile time. (Usually won't be used, since pointers are usually dynamic).
+ *
+ * @param p_ptr The pointer to be hashed.
+ * @return The hash code of the pointer.
+ */
+consteval HashCode static_hash_ptr(const void* p_ptr) {
+    return static_hash(reinterpret_cast<uintptr_t>(p_ptr));
+}
+
+/**
+ * @brief Hash a pointer in run time.
+ *
+ * @param p_ptr The pointer to be hashed.
+ * @return The hash code of the pointer.
+ */
+inline HashCode dynam_hash_ptr(const void* p_ptr) {
+    return dynam_hash(reinterpret_cast<uintptr_t>(p_ptr));
+}
+
+using ChannelID = HashCode;
 
 // Color space
 enum class ColorSpace {
@@ -270,8 +443,6 @@ enum class ColorSpace {
     // SRGB space
     SRGB
 };
-
-using ChannelID = HashCode;
 
 /**
  * @brief A better name for the required field.
@@ -359,7 +530,7 @@ struct Buffer : public BufferBase<Buffer<SIZE>> {
  * @return The incremented index.
  */
 constexpr size_t ring_increment(size_t p_i, size_t p_ring_size) {
-    return ((p_i) + 1) % p_ring_size;
+    return (p_i + 1) % p_ring_size;
 }
 
 /**

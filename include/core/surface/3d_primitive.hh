@@ -15,11 +15,12 @@
 #ifndef WBE_FILE_3D_PRIMITIVE_HH
 #define WBE_FILE_3D_PRIMITIVE_HH
 
-#include "core/allocator/allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/memory/reference_raw.hh"
 #include "core/reflection/reflection_defs.hh"
+#include "glm/ext/vector_float3.hpp"
+#include "glm/ext/vector_float2.hpp"
 #include <cstdint>
-#include <glm/glm.hpp>
 
 namespace WhiteBirdEngine {
 
@@ -116,7 +117,7 @@ struct Triangle3DIndx {
     /**
      * @brief The vertex array.
      */
-    RefRaw<TVertType, Allocator> vert_array;
+    RefRaw<TVertType, IAllocator> vert_array;
     struct Indices {
         uint32_t vert_1;
         uint32_t vert_2;

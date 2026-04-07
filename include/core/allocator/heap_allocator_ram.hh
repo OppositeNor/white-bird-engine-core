@@ -15,11 +15,14 @@
 #ifndef WBE_FILE_HEAP_ALLOCATOR_RAM_HH
 #define WBE_FILE_HEAP_ALLOCATOR_RAM_HH
 
+#include "core/allocator/i_allocator.hh"
 #include "heap_allocator.hh"
 #include "utils/defs.hh"
-#include <bit>
+#include <cstddef>
+#include <cstdint>
 #include <set>
 #include <sstream>
+#include <string>
 namespace WhiteBirdEngine {
 
 template <>
@@ -55,7 +58,7 @@ public:
         if (p_id == 0) {
             return nullptr;
         }
-        return std::bit_cast<void*>(p_id);
+        return reinterpret_cast<void*>(p_id);
     }
 
     uint32_t obj_count() const {

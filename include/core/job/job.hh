@@ -15,6 +15,10 @@
 #ifndef WBE_FILE_JOB_HH
 #define WBE_FILE_JOB_HH
 
+#include "utils/defs.hh"
+#include <functional>
+#include <utility>
+
 namespace WhiteBirdEngine {
 
 /**
@@ -22,23 +26,27 @@ namespace WhiteBirdEngine {
  * @brief A job.
  *
  */
-template <typename ChildT>
-struct Job {
-    Job() = default;
-    virtual ~Job() = default;
-    Job(const Job&) = default;
-    Job(Job&&) = default;
-    Job& operator=(const Job&) = default;
-    Job& operator=(Job&&) = default;
-
+class Job final {
+public:
+    Job() = delete;
+    ~Job() = default;
+    WBE_R6_NDCD_DELETE_COPY_MOVE(Job)
     /**
-     * @brief Get this job instance with the child type.
+     * @brief Constructor.
      *
-     * @return The instance with the child type.
+     * @param p_job The job function.
      */
-    ChildT* get() {
-        return static_cast<ChildT*>(this);
+    Job(const std::function<void()>& p_job)
+    : job(p_job) {}
+
+    Job(std::function<void()>&& p_job)
+    : job(std::move(p_job)) {}
+
+    void perform() {
+        job();
     }
+private:
+    std::function<void()> job;
 };
 
 } // namespace WhiteBirdEngine

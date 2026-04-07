@@ -1,3 +1,4 @@
+// fragment
 /* Copyright 2025 OppositeNor
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +13,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+#include "draw_cube/draw_cube_utils.slangh"
+#include "defs.slangh"
 
-#ifndef WBE_FILE_MAIN_PIPELINE_UTILS_HLSLH
-#define WBE_FILE_MAIN_PIPELINE_UTILS_HLSLH
-struct VSOutput {
-    float4 position : SV_Position;
-    float2 uv       : COLOR0;
-};
+float4 main(VSOutput p_input) : SV_Target0 {
+    return float4(p_input.normal * 0.5 + 0.5, 1.0);
+}
 
-#endif

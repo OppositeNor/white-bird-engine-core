@@ -1,4 +1,4 @@
-// vert
+// vertex
 /* Copyright 2025 OppositeNor
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +13,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#include "draw_triangle/draw_triangle_utils.hlslh"
-#include "defs.hlslh"
+#include "draw_triangle/draw_triangle_utils.slangh"
+#include "defs.slangh"
 
 VSOutput main(Vertex3DTexturedInput p_input) {
     VSOutput output;

@@ -11,5 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# TODO
+file(GLOB wbe_job_src ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+
+set(wbe_core_src
+    ${wbe_core_src}
+    ${wbe_job_src}
+    PARENT_SCOPE
+)
 

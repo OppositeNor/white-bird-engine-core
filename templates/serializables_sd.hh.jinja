@@ -13,9 +13,8 @@
    limitations under the License.
 #}
 // {{ _prefix }}
-
-#ifndef __WBE_SERIALIZABLES_SD_HH__
-#define __WBE_SERIALIZABLES_SD_HH__
+#ifndef WBE_FILE_SERIALIZABLES_SD_GEN_HH
+#define WBE_FILE_SERIALIZABLES_SD_GEN_HH
 
 {% for serializable in metadata.classes %}
 {% if serializable.attribute | select("in", static_serializables) | list | length > 0  %}
@@ -118,14 +117,6 @@ public:
 
 {% for serializable in metadata.classes %}
 {% if serializable.attribute | select("in", static_serializables) | list | length > 0  %}
-/**
- * @brief Serialize.
- *
- * @tparam ParserDataType The type of the data.
- * @param p_key The key to insert into p_data.
- * @param p_data The data to insert result.
- * @param p_serializable The object to serialize.
- */
 template <typename ParserDataType>
 void SerializableSD<{{ serializable.name }}>::serialize(ParserDataType& p_data, const ObjType& p_serializable) {
     {% for extended_parent in serializable.extended_parents %}
@@ -139,13 +130,6 @@ void SerializableSD<{{ serializable.name }}>::serialize(ParserDataType& p_data, 
     {% endfor %}
 }
 
-/**
- * @brief Deserialize.
- *
- * @tparam ParserDataType The type of the data.
- * @param p_data The data to retrieve value from.
- * @param p_serializable The object to deserialize.
- */
 template <typename ParserDataType>
 void SerializableSD<{{ serializable.name }}>::deserialize(const ParserDataType& p_data, ObjType& p_serializable) {
     {% for extended_parent in serializable.extended_parents %}
@@ -166,6 +150,6 @@ void SerializableSD<{{ serializable.name }}>::deserialize(const ParserDataType& 
 }
 {% endif %}
 {% endfor %}
-}
+} // namespace WhiteBirdEngine
 
 #endif

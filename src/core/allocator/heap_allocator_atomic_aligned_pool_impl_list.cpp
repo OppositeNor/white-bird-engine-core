@@ -13,7 +13,7 @@
    limitations under the License.
 */
 #include "core/allocator/heap_allocator_atomic_aligned_pool_impl_list.hh"
-#include "core/allocator/allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/logging/log.hh"
 #include "utils/defs.hh"
 #include "utils/utils.hh"
@@ -25,6 +25,7 @@
 #include <cstring>
 #include <format>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -81,8 +82,8 @@ MemID HeapAllocatorAtomicAlignedPoolImplicitList::allocate(size_t p_size, size_t
     if (p_size == 0) {
         return MEM_NULL;
     }
-    if (p_alignment % alignof(Header)) {
-        throw std::runtime_error(std::format("Allocation alignment must be a multiple of {}.", alignof(Header)));
+    if (p_alignment % HEADER_SIZE) {
+        throw std::runtime_error(std::format("Allocation alignment must be a multiple of {}.", HEADER_SIZE));
     }
     // Clamp the padding size to the default alignment.
     size_t aligned_size = get_align_size(p_size, HEADER_SIZE) + HEADER_SIZE;

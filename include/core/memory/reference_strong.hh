@@ -15,11 +15,13 @@
 #ifndef WBE_FILE_REFERENCE_STRONG_HH
 #define WBE_FILE_REFERENCE_STRONG_HH
 
-#include "core/allocator/allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/allocator/heap_allocator.hh"
 #include "utils/defs.hh"
 #include <atomic>
+#include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <stdexcept>
 
@@ -152,7 +154,7 @@ public:
      */
     Ref(AllocType* p_allocator, MemID p_mem_id) {
         WBE_DEBUG_ASSERT(p_allocator != nullptr);
-        MemID control_block_mem_id = create_obj<ControlBlock>(*(p_allocator), p_allocator, p_mem_id);
+        MemID control_block_mem_id = create_obj<ControlBlock>(*p_allocator, p_allocator, p_mem_id);
         control_block = p_allocator->template get_obj<ControlBlock>(control_block_mem_id);
         control_block->control_block_mem_id = control_block_mem_id;
         ref();
@@ -213,7 +215,7 @@ public:
         if (casted_ptr == nullptr) {
             return MEM_NULL;
         }
-        return Ref<T1, AllocType>(reinterpret_cast<typename Ref<T1, AllocType>::ControlBlock*>(control_block));
+        return Ref<T1, AllocType>(reinterpret_cast<Ref<T1, AllocType>::ControlBlock*>(control_block));
     }
 
     /**

@@ -13,7 +13,7 @@
    limitations under the License.
 */
 #include "core/allocator/heap_allocator_aligned_pool_impl_list.hh"
-#include "core/allocator/allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/logging/log.hh"
 #include "utils/defs.hh"
 #include "utils/utils.hh"
@@ -24,6 +24,7 @@
 #include <cstring>
 #include <format>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 

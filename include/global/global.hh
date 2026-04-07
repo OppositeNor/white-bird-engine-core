@@ -12,13 +12,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#ifndef __WBE_GLOBAL_HH__
-#define __WBE_GLOBAL_HH__
+#ifndef WBE_FILE_GLOBAL_HH
+#define WBE_FILE_GLOBAL_HH
 
 #include "core/engine_core.hh"
+#include "core/memory/unique.hh"
 #include "platform/file_system/directory.hh"
 #include "utils/defs.hh"
-#include "utils/interface/singleton.hh"
+#include "utils/interface/i_singleton.hh"
 
 namespace WhiteBirdEngine {
 /**
@@ -26,7 +27,7 @@ namespace WhiteBirdEngine {
  * @brief Global class. Stores all the global objects.
  * Terminate and then reinitialize it should result in restarting the game/engine.
  */
-class Global final : public Singleton<Global> {
+class Global final : public ISingleton<Global> {
 public:
     Global() = delete;
     virtual ~Global() override;

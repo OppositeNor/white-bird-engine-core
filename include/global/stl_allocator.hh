@@ -12,16 +12,20 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#ifndef __WBE_STL_ALLOCATOR_HH__
-#define __WBE_STL_ALLOCATOR_HH__
+#ifndef WBE_FILE_STL_ALLOCATOR_HH
+#define WBE_FILE_STL_ALLOCATOR_HH
 
-#include "core/allocator/allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/core_utils.hh"
+#include <cstddef>
 #include <deque>
+#include <functional>
+#include <map>
 #include <set>
 #include <string>
 #include <type_traits>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 namespace WhiteBirdEngine {
 
@@ -100,7 +104,7 @@ struct STLAllocator {
      * @return The allocated memory.
      */
     T* allocate(size_t p_num) {
-        return std::bit_cast<T*>(allocator->allocate(p_num * sizeof(T)));
+        return reinterpret_cast<T*>(allocator->allocate(p_num * sizeof(T)));
     }
     /**
      * @brief Deallocate memory
@@ -157,13 +161,8 @@ using String = std::basic_string<char, std::char_traits<char>, STLAllocator<char
 template <typename T, typename AllocType = HeapAllocatorDefault>
 using Deque = std::deque<T, STLAllocator<T, AllocType, false, true, false>>;
 
-/**
- * @brief Short name for stl allocator that uses HeapAllocatorDefault.
- *
- * @tparam T 
- */
-template <typename T>
-using STLAllocatorPool = STLAllocator<T, HeapAllocatorDefault, false, true, false>;
+template <typename TKey, typename TVal, typename AllocType = HeapAllocatorDefault>
+using Map = std::map<TKey, TVal, std::less<TKey>, STLAllocator<std::pair<const TKey, TVal>, AllocType, false, true, false>>;
 
 } // namespace WhiteBirdEngine
 

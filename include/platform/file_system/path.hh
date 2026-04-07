@@ -17,7 +17,10 @@
 
 #include "platform/file_system/directory.hh"
 #include "utils/utils.hh"
+#include <cstddef>
+#include <ostream>
 #include <string>
+#include <utility>
 
 namespace WhiteBirdEngine {
 
@@ -88,6 +91,20 @@ public:
      */
     const std::string& get_file_name() const {
         return file_name;
+    }
+
+    /**
+     * @brief Get the extension of the file.
+     *
+     * @todo: Test
+     * @return The extension of the file. Empty string if no extension.
+     */
+    std::string get_extension() const {
+        size_t dot_pos = file_name.rfind('.');
+        if (dot_pos == std::string::npos || dot_pos == file_name.length() - 1) {
+            return "";
+        }
+        return file_name.substr(dot_pos + 1);
     }
 
     /**

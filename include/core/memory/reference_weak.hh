@@ -16,9 +16,14 @@
 #define WBE_FILE_REFERENCE_WEAK_HH
 
 #include "core/allocator/heap_allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "reference_strong.hh"
+#include "utils/defs.hh"
 #include <atomic>
 #include <concepts>
+#include <cstdint>
+#include <functional>
+#include <cstddef>
 
 namespace WhiteBirdEngine {
 
@@ -37,7 +42,7 @@ public:
         p_other.ref();
         control_block = p_other.control_block;
     }
-    RefWeak(RefWeak<T, AllocType>&& p_other) {
+    RefWeak(RefWeak<T, AllocType>&& p_other) noexcept {
         WBE_DEBUG_ASSERT(p_other.control_block != nullptr);
         control_block = p_other.control_block;
         p_other.control_block = nullptr;
@@ -52,7 +57,7 @@ public:
         control_block = p_other.control_block;
         return *this;
     }
-    RefWeak& operator=(RefWeak<T, AllocType>&& p_other) {
+    RefWeak& operator=(RefWeak<T, AllocType>&& p_other) noexcept {
         WBE_DEBUG_ASSERT(p_other.control_block != nullptr);
         if (*this == p_other) {
             return *this;
@@ -194,7 +199,7 @@ private:
     }
 };
 
-}
+} // namespace WhiteBirdEngine
 
 namespace std {
 /**
@@ -214,6 +219,6 @@ struct hash<::WhiteBirdEngine::RefWeak<T, AllocType>> {
     }
 
 };
-}
+} // namespace std
 
 #endif

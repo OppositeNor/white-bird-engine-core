@@ -12,16 +12,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#include "core/allocator/allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/logging/log.hh"
 #include "utils/defs.hh"
 #include "core/allocator/heap_allocator_pool.hh"
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <format>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace WhiteBirdEngine {
 

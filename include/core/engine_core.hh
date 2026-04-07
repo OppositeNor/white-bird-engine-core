@@ -14,26 +14,30 @@
 */
 #ifndef WBE_FILE_ENGINE_CORE_HH
 #define WBE_FILE_ENGINE_CORE_HH
-#include "core/allocator/heap_allocator_aligned_pool_impl_list.hh"
-#include "core/allocator/heap_allocator_atomic_aligned_pool_impl_list.hh"
 #include "core/allocator/stack_allocator.hh"
+#include "core/core_utils.hh"
 #include "core/engine_config/engine_config.hh"
 #include "core/clock/clock.hh"
 #include "core/logging/log_stream.hh"
 #include "core/logging/logging_manager.hh"
 #include "generated/label_manager.gen.hh"
 #include "generated/type_uuid.gen.hh"
+#include "platform/file_system/directory.hh"
 #include "platform/file_system/file_system.hh"
-#include "utils/interface/singleton.hh"
+#include "utils/defs.hh"
+#include "utils/interface/i_singleton.hh"
+#include <ostream>
 
 namespace WhiteBirdEngine {
+
+using HeapAllocatorGlobal = HeapAllocatorDefault;
 
 /**
  * @class EngineCore
  * @brief Core singleton of the engine. Contains all singletons of the core layer.
  *
  */
-class EngineCore : public Singleton<EngineCore> {
+class EngineCore : public ISingleton<EngineCore> {
 public:
     EngineCore() = delete;
     virtual ~EngineCore() override;
@@ -85,11 +89,7 @@ public:
     /**
      * @brief Global pool allocator.
      */
-    HeapAllocatorAlignedPoolImplicitList* pool_allocator = nullptr;
-    /**
-     * @brief Global atomic pool allocator.
-     */
-    HeapAllocatorAtomicAlignedPoolImplicitList* atomic_pool_allocator = nullptr;
+    HeapAllocatorGlobal* pool_allocator = nullptr;
     /**
      * @brief Manager for logs.
      */
@@ -117,7 +117,7 @@ private:
  *
  * @return The global allocator;
  */
-inline HeapAllocatorAlignedPoolImplicitList* global_allocator() {
+inline HeapAllocatorGlobal* global_allocator() {
     return EngineCore::get_singleton()->pool_allocator;
 }
 

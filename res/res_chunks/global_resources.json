@@ -1,23 +1,13 @@
 {
-    "include": [],
+    "include": [
+        "assets/meshes/cube.json",
+        "assets/shaders/main_pipeline/main_pipeline_shader.json"
+    ],
     "resources": [
-        {
-            "id": "main_shader_vert",
-            "type": "binary",
-            "path": "assets/shaders/main_pipeline_vert.spv"
-        },
-        {
-            "id": "main_shader_pixl",
-            "type": "binary",
-            "path": "assets/shaders/main_pipeline_frag.spv"
-        },
         {
             "id": "default_material",
             "type": "material",
-            "shading_model": {
-                "type": "resource_reference",
-                "id": "cook_torrance_pbr"
-            },
+            "shading_model_id": "cook_torrance_pbr",
             "textures": {
                 "normal": {
                     "type": "image",
@@ -33,7 +23,7 @@
                 },
                 "roughness_metallic_ao": {
                     "type": "image",
-                    "path": "assets/images/default_rma.png",
+                    "path": "assets/images/default_rmo.png",
                     "color_space": "rgb",
                     "channel_count": 3
                 }

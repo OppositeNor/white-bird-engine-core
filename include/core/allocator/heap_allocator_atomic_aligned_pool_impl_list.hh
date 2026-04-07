@@ -15,15 +15,16 @@
 #ifndef WBE_FILE_HEAP_ALLOCATOR_ATOMIC_ALIGNED_POOL_IMPL_LIST_HH
 #define WBE_FILE_HEAP_ALLOCATOR_ATOMIC_ALIGNED_POOL_IMPL_LIST_HH
 
-#include "core/allocator/allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/allocator/heap_allocator_aligned.hh"
+#ifdef _DEBUG
 #include "core/debug_utils/debug_mutex.hh"
+#endif
 #include "utils/defs.hh"
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <boost/thread/lock_types.hpp>
-#include <boost/thread/shared_mutex.hpp>
 #include <string>
 
 #define WBE_HAAAPIL_GET_HEADER_SIZE(p_header) p_header & TOTAL_SIZE_MASK
@@ -52,6 +53,8 @@ struct AllocatorTrait<class HeapAllocatorAtomicAlignedPoolImplicitList> final : 
  * @brief Heap allocator atomic pool with memory alignment support, with an implicit list.
  */
 class HeapAllocatorAtomicAlignedPoolImplicitList final : public HeapAllocatorAligned {
+private:
+    using Header = uint64_t;
 public:
     HeapAllocatorAtomicAlignedPoolImplicitList()
     : HeapAllocatorAtomicAlignedPoolImplicitList(WBE_KiB(64)) {}
@@ -60,8 +63,6 @@ public:
     HeapAllocatorAtomicAlignedPoolImplicitList(HeapAllocatorAtomicAlignedPoolImplicitList&&) = delete;
     HeapAllocatorAtomicAlignedPoolImplicitList& operator=(const HeapAllocatorAtomicAlignedPoolImplicitList&) = delete;
     HeapAllocatorAtomicAlignedPoolImplicitList& operator=(HeapAllocatorAtomicAlignedPoolImplicitList&&) = delete;
-
-    using Header = uint64_t;
 
     /**
      * @brief The size of the allocated memory header.

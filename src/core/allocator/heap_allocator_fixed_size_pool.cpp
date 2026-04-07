@@ -13,12 +13,21 @@
    limitations under the License.
 */
 #include "core/allocator/heap_allocator_fixed_size_pool.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/logging/log.hh"
+#include "utils/defs.hh"
+#include "utils/utils.hh"
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <format>
+#include <sstream>
 #include <stdexcept>
+
+#define WBE_HAFSP_GET_DATA_INDEX(id) (*(index_chunk_start + (id) - 1))
+#define WBE_HAFSP_DATA_CHUNK_START (mem_chunk)
+#define WBE_HAFSP_WRITE_ID(id, data_index) do { *(index_chunk_start + (id) - 1) = (data_index); } while (false)
+#define WBE_HAFSP_WRITE_DATA_INDEX(data_index, id) do { *(index_chunk_rev_start + (data_index) - 1) = (id); } while (false)
 
 namespace WhiteBirdEngine {
 HeapAllocatorFixedSizePool::~HeapAllocatorFixedSizePool() {
@@ -32,8 +41,8 @@ inline MemID HeapAllocatorFixedSizePool::allocate(size_t p_size) {
     if (p_size == 0) {
         p_size = element_size;
     }
-    if (p_size != element_size) {
-        throw std::runtime_error(std::format("Failed to allocate memory: size must be: ", element_size));
+    if (get_align_size(p_size, WBE_DEFAULT_ALIGNMENT) != element_size) {
+        throw std::runtime_error(std::format("Failed to allocate memory: size must be: {} after alignment.", element_size));
     }
     if (alloc_obj_count >= max_obj) {
         throw std::runtime_error("Failed to allocate memory: not enough space for memory pool.");
@@ -44,7 +53,7 @@ inline MemID HeapAllocatorFixedSizePool::allocate(size_t p_size) {
 }
 
 inline void HeapAllocatorFixedSizePool::deallocate(MemID p_mem) {
-    DataIndex data_index = get_data_index(p_mem);
+    DataIndex data_index = WBE_HAFSP_GET_DATA_INDEX(p_mem);
     if (data_index == MEM_NULL || p_mem > max_obj) {
         throw std::runtime_error("Failed to deallocate memory: memory not allocated in this memory pool.");
     }
@@ -55,7 +64,7 @@ inline void HeapAllocatorFixedSizePool::deallocate(MemID p_mem) {
         memcpy(data_loc, copy_from, element_size);
         write_info(copy_from_id, data_index);
     }
-    write_data_index(alloc_obj_count, MEM_NULL);
+    WBE_HAFSP_WRITE_DATA_INDEX(alloc_obj_count, MEM_NULL);
     --alloc_obj_count;
 }
 
@@ -63,7 +72,7 @@ inline HeapAllocatorFixedSizePool::operator std::string() const {
     std::stringstream ss;
     ss << "{";
     ss << R"("type":"HeapAllocatorFixedSizePool",)";
-    ss << "\"size\":" << element_size << ",";
+    ss << "\"element_size\":" << element_size << ",";
     ss << "\"obj_count\":" << obj_count() << ",";
     ss << "\"max_obj\":" << static_cast<uint32_t>(max_obj) << ",";
     ss << "\"allocated\":[";

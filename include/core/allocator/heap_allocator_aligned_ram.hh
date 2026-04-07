@@ -15,13 +15,15 @@
 #ifndef WBE_FILE_HEAP_ALLOCATOR_ALIGNED_RAM_HH
 #define WBE_FILE_HEAP_ALLOCATOR_ALIGNED_RAM_HH
 
-#include "core/allocator/allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/allocator/heap_allocator_aligned.hh"
 #include "core/logging/log.hh"
 #include "utils/defs.hh"
 #include "utils/utils.hh"
-#include <bit>
+#include <cstddef>
+#include <cstdint>
 #include <set>
+#include <sstream>
 #include <unordered_map>
 namespace WhiteBirdEngine {
 
@@ -69,7 +71,7 @@ public:
         }
         size_t align_size = get_align_size(p_size, p_alignment);
         void* mem = aligned_alloc(p_alignment, align_size);
-        MemID result = std::bit_cast<MemID>(mem);
+        MemID result = reinterpret_cast<MemID>(mem);
         allocated.insert(result);
         size_map[result] = align_size;
         return result;
@@ -79,7 +81,7 @@ public:
         WBE_DEBUG_ASSERT(size_map.contains(p_mem));
         size_map.erase(p_mem);
         allocated.erase(p_mem);
-        free(std::bit_cast<void*>(p_mem)); // NOLINT
+        free(reinterpret_cast<void*>(p_mem)); // NOLINT
     }
 
     virtual void* get(MemID p_id) const override {
