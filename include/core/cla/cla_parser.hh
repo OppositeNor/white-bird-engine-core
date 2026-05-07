@@ -44,12 +44,11 @@ public:
      * @brief Parse tokens into ast.
      *
      * @param p_tokens The tokens to parse.
-     * @return 
+     * @return
      */
     Ref<CLAASTNode> parse(const std::vector<CLAToken>& p_tokens);
-    
-private:
 
+private:
     enum class ParseState {
         START,
         GET_ROOT_OPERAND,

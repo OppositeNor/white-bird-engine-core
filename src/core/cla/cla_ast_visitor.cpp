@@ -73,9 +73,9 @@ void CLAASTVisitorAssembler::visit(CLAASTNodeOperation* p_node) {
         return;
     }
     size_t input_arg_num = p_node->get_arguments().size();
-    if (arg_num >= 0 && std::cmp_less(input_arg_num ,arg_num)) {
-        throw std::runtime_error("Failed to parse operation: " + operation_name + ", not enough arguments. Expected: "
-                                 + std::to_string(arg_num) + ", inputed: " + std::to_string(input_arg_num) + ".");
+    if (arg_num >= 0 && std::cmp_less(input_arg_num, arg_num)) {
+        throw std::runtime_error("Failed to parse operation: " + operation_name + ", not enough arguments. Expected: " +
+                                 std::to_string(arg_num) + ", inputed: " + std::to_string(input_arg_num) + ".");
     }
     get_operation(p_node, operation_name, arg_num);
 }
@@ -84,7 +84,7 @@ bool CLAASTVisitorAssembler::get_operation_arg_count(std::string& p_op_name, CLA
     if (p_node->is_name_short()) {
         auto arg_name_short = arg_short_to_long.find(p_op_name[0]);
         if (arg_name_short == arg_short_to_long.end()) {
-            stdout_log(WBE_CHANNEL_GLOBAL)->message("Unrecognized argument name: \"" + p_op_name +  "\", ignored.");
+            stdout_log(WBE_CHANNEL_GLOBAL)->message("Unrecognized argument name: \"" + p_op_name + "\", ignored.");
             return false;
         }
         p_op_name = arg_name_short->second;
@@ -92,7 +92,7 @@ bool CLAASTVisitorAssembler::get_operation_arg_count(std::string& p_op_name, CLA
     auto find_arg_num = arg_count_long.find(p_op_name);
     WBE_DEBUG_ASSERT(!p_node->is_name_short() || find_arg_num != arg_count_long.end());
     if (find_arg_num == arg_count_long.end()) {
-        stdout_log(WBE_CHANNEL_GLOBAL)->message("Unrecognized argument name: \"" + p_op_name +  "\", ignored.");
+        stdout_log(WBE_CHANNEL_GLOBAL)->message("Unrecognized argument name: \"" + p_op_name + "\", ignored.");
         return false;
     }
     p_arg_num = find_arg_num->second;

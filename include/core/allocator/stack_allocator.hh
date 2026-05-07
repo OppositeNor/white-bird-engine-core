@@ -42,12 +42,14 @@ struct AllocatorTrait<class StackAllocator> {
 
 /**
  * @class StackAllocator
- * @brief Stack style allocation. Can only allocate and deallocate from the top of the stack.
+ * @brief Stack style allocation. Can only allocate and deallocate from the top
+ * of the stack.
  * @todo Test
  */
 class StackAllocator final : public IAllocator {
 public:
-    StackAllocator() : StackAllocator(1024) {}
+    StackAllocator() : StackAllocator(1024) {
+    }
     virtual ~StackAllocator() override = default;
     StackAllocator(const StackAllocator&) = delete;
     StackAllocator(StackAllocator&&) = delete;
@@ -59,16 +61,14 @@ public:
      *
      * @param p_size The size of the allocated buffer in bytes.
      */
-    StackAllocator(size_t p_size)
-        : total_size(p_size), stack_pointer(0),
-        mem_chunk(std::make_unique<char[]>(total_size)) {
+    StackAllocator(size_t p_size) : total_size(p_size), stack_pointer(0), mem_chunk(std::make_unique<char[]>(total_size)) {
     }
 
     /**
      * @brief Allocate memory with a specified size.
      *
      * @param p_size The size of the memory to be allocated in bytes.
-     * @return 
+     * @return
      */
     MemID allocate(size_t p_size) {
         void* result = mem_chunk.get() + stack_pointer;
@@ -142,7 +142,7 @@ public:
     /**
      * @brief Get the total size of the allocator.
      *
-     * @return 
+     * @return
      */
     size_t get_total_size() const {
         return total_size;
@@ -150,8 +150,7 @@ public:
 
     operator std::string() const {
         std::stringstream ss;
-        ss << R"({"type":"StackAllocator","total_size":)" << total_size
-           << R"(,"stack_pointer":)" << stack_pointer
+        ss << R"({"type":"StackAllocator","total_size":)" << total_size << R"(,"stack_pointer":)" << stack_pointer
            << R"(,"available":)" << (total_size - stack_pointer) << "}";
         return ss.str();
     }
@@ -165,7 +164,7 @@ private:
 template <typename T, typename... Args>
 MemID create_stack_obj(StackAllocator& p_allocator, Args&&... p_args) {
     MemID result = p_allocator.allocate(sizeof(T));
-    new(p_allocator.get(result)) T(std::forward<Args>(p_args)...);
+    new (p_allocator.get(result)) T(std::forward<Args>(p_args)...);
     return result;
 }
 

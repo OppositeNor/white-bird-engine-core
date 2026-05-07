@@ -12,14 +12,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#include "platform/file_system/path.hh"
-#include "platform/file_system/file_system.hh"
-#include <string>
 
-namespace WhiteBirdEngine {
+#ifndef WBE_FILE_MAIN_PIPELINE_UTILS_SLANG
+#define WBE_FILE_MAIN_PIPELINE_UTILS_SLANG
+struct VSOutput {
+    float4 position : SV_Position;
+    float2 uv       : TEXCOORD0;
+};
 
-Path::operator std::string() const {
-    return FileSystem::path_to_string(*this);
-}
-
-} // namespace WhiteBirdEngine
+#endif

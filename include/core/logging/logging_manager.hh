@@ -20,9 +20,9 @@
 #include "core/logging/log.hh"
 #include "utils/defs.hh"
 #include "utils/interface/i_singleton.hh"
+#include "utils/utils.hh"
 #include <cstddef>
 #include <cstdint>
-#include "utils/utils.hh"
 #include <mutex>
 #include <shared_mutex>
 #include <unordered_map>
@@ -42,11 +42,14 @@ public:
     /**
      * @brief Constructor.
      *
-     * @param p_channel_argument The argument to input to the constructor of the log object.
-     * @param p_log_allocator_size The argument to input to the constructor of the log object.
+     * @param p_channel_argument The argument to input to the constructor of the
+     * log object.
+     * @param p_log_allocator_size The argument to input to the constructor of
+     * the log object.
      */
     LoggingManager(T& p_channel_argument, size_t p_log_allocator_size = WBE_KiB(1))
-        : ISingleton<LoggingManager>(), channel_argument(&p_channel_argument), log_allocator(p_log_allocator_size) {}
+        : ISingleton<LoggingManager>(), channel_argument(&p_channel_argument), log_allocator(p_log_allocator_size) {
+    }
 
     virtual ~LoggingManager() override {
         size_t channel_logs_size = channel_logs.size();

@@ -42,12 +42,14 @@ struct AllocatorTrait<class HeapAllocatorPool> final : public AllocatorTrait<Hea
 
 /**
  * @class HeapAllocatorPool
- * @brief Pool allocator. Allocate from a continuous memory pool, to prevent memory fragmentation.
+ * @brief Pool allocator. Allocate from a continuous memory pool, to prevent
+ * memory fragmentation.
  *
  */
 class HeapAllocatorPool final : public HeapAllocator {
 public:
-    HeapAllocatorPool() : HeapAllocatorPool(WBE_KiB(1)) {}
+    HeapAllocatorPool() : HeapAllocatorPool(WBE_KiB(1)) {
+    }
     virtual ~HeapAllocatorPool() override;
     HeapAllocatorPool(const HeapAllocatorPool&) = delete;
     HeapAllocatorPool(HeapAllocatorPool&&) = delete;
@@ -112,7 +114,6 @@ public:
     }
 
 private:
-    
     struct IdleListNode {
         size_t size;
         char* mem_start;

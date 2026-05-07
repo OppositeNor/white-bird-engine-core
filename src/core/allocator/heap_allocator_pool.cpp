@@ -12,10 +12,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+#include "core/allocator/heap_allocator_pool.hh"
 #include "core/allocator/i_allocator.hh"
 #include "core/logging/log.hh"
 #include "utils/defs.hh"
-#include "core/allocator/heap_allocator_pool.hh"
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -36,8 +36,7 @@ HeapAllocatorPool::~HeapAllocatorPool() {
     mem_chunk = nullptr;
 }
 
-HeapAllocatorPool::HeapAllocatorPool(size_t p_size)
-    : size(p_size) {
+HeapAllocatorPool::HeapAllocatorPool(size_t p_size) : size(p_size) {
     if (p_size > MAX_TOTAL_SIZE) {
         throw std::runtime_error(std::format("Failed to create pool: size: {} exceeds maximum: {}.", p_size, MAX_TOTAL_SIZE));
     }
@@ -62,8 +61,8 @@ MemID HeapAllocatorPool::allocate(size_t p_size) {
         if ((*valid_idle_node)->size >= p_size) {
             void* result = acquire_memory(*valid_idle_node, p_size);
             *reinterpret_cast<uint64_t*>(result) = p_size;
-            max_data_loc_tracker = std::max(max_data_loc_tracker, reinterpret_cast<uintptr_t>(result)
-                                            + p_size - reinterpret_cast<uintptr_t>(mem_chunk));
+            max_data_loc_tracker = std::max(
+                max_data_loc_tracker, reinterpret_cast<uintptr_t>(result) + p_size - reinterpret_cast<uintptr_t>(mem_chunk));
             return reinterpret_cast<MemID>(result) + HEADER_SIZE;
         }
         if ((*valid_idle_node)->next == nullptr) {
@@ -71,8 +70,9 @@ MemID HeapAllocatorPool::allocate(size_t p_size) {
         }
         valid_idle_node = &((*valid_idle_node)->next);
     }
-  throw std::runtime_error(std::format("Failed to allocate memory: not enough space for memory pool.\n"
-                                       "Trying to allocate: {} bytes.", p_size));
+    throw std::runtime_error(std::format("Failed to allocate memory: not enough space for memory pool.\n"
+                                         "Trying to allocate: {} bytes.",
+        p_size));
 }
 
 void HeapAllocatorPool::deallocate(MemID p_mem) {
@@ -99,8 +99,7 @@ void* HeapAllocatorPool::acquire_memory(std::unique_ptr<IdleListNode>& p_node, s
         p_node->size = p_node->next->size;
         p_node->mem_start = p_node->next->mem_start;
         p_node->next = std::move(p_node->next->next);
-    }
-    else {
+    } else {
         p_node->mem_start += p_mem_size;
     }
     return mem_start;
@@ -130,8 +129,7 @@ void HeapAllocatorPool::insert_free_memory(IdleListNode* p_node_before_insert, c
     p_node_before_insert->next = std::move(insert_node);
     if (combine_idle_with_next(p_node_before_insert)) {
         combine_idle_with_next(p_node_before_insert);
-    }
-    else if (p_node_before_insert->next != nullptr) {
+    } else if (p_node_before_insert->next != nullptr) {
         combine_idle_with_next(p_node_before_insert->next.get());
     }
 }
@@ -158,7 +156,6 @@ std::unique_ptr<HeapAllocatorPool::IdleListNode>& HeapAllocatorPool::get_idle_no
     throw std::runtime_error("Unreachable code.");
 }
 
-
 size_t HeapAllocatorPool::get_remain_size() const {
     IdleListNode* node = idle_list_head.get();
     size_t total = 0;
@@ -184,8 +181,7 @@ HeapAllocatorPool::operator std::string() const {
         first = false;
         ss << "{"
            << "\"begin\":" << (node->mem_start - mem_chunk) << ","
-           << "\"size\":" << node->size
-           << "}";
+           << "\"size\":" << node->size << "}";
         node = node->next.get();
     }
     ss << "]";
@@ -194,4 +190,3 @@ HeapAllocatorPool::operator std::string() const {
 }
 
 } // namespace WhiteBirdEngine
-

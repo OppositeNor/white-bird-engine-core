@@ -30,7 +30,6 @@ namespace WhiteBirdEngine {
 template <typename ChildType>
 class ParserData {
 public:
-
     /**
      * @brief Get all the key values.
      */
@@ -39,7 +38,8 @@ public:
     }
 
     /**
-     * @brief Set a value. If the value was not recorded, a new value will be created.
+     * @brief Set a value. If the value was not recorded, a new value will be
+     * created.
      *
      * @tparam T The type of the value to set.
      * @param p_key The key of the value.
@@ -124,7 +124,6 @@ inline std::ostream& operator<<(std::ostream& p_ostream, const ParserData<Parser
     return operator<<(p_ostream, p_parser);
 }
 
-
 /**
  * @class Parser
  * @brief Parser interface.
@@ -135,7 +134,8 @@ template <typename ChildType>
 class Parser {
 public:
     Parser() = default;
-    ~Parser() {}
+    ~Parser() {
+    }
 
     /**
      * @brief Parse a file from a path.
@@ -250,6 +250,6 @@ public:
 
 WBE_DECL_CRTP_CONCEPT(Parser);
 
-}
+} // namespace WhiteBirdEngine
 
 #endif

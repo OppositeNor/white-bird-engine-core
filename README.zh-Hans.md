@@ -1,12 +1,10 @@
-# 白鸟引擎
+# White Bird Engine
 
-> 免费/自由游戏引擎。
+> 一个为节奏游戏开发而构建的免费/自由游戏引擎。
 >
-> 基于 [Apache License Version 2.0](https://github.com/OppositeNor/white-bird-engine-core/blob/master/LICENSE) 许可发布。
+> 基于 [Apache License Version 2.0](https://github.com/OppositeNor/white-bird-engine/blob/main/LICENSE) 许可发布。
 
 * [English](./README.md)
-
-此仓库包含白鸟引擎核心层。完整引擎正在开发中。
 
 ## 如何构建
 
@@ -69,24 +67,12 @@ python ./build.py -t release-gcc    # 使用 GCC 的 Release 构建
 python ./build.py -t deploy         # 使用 GCC 的部署构建
 ```
 
-## 基准测试结果：
+## 贡献
 
-```
-分配器（乱序释放）:
-----------------------------------------------------------------------------------------------------------
-Benchmark                                                                Time             CPU   Iterations
-----------------------------------------------------------------------------------------------------------
-malloc_free_benchmark_with_shuffle                                     679 ns          676 ns       939593
-heap_allocated_aligned_pool_benchmark_with_shuffle                    1460 ns         1456 ns       468061
-heap_allocated_aligned_pool_impl_list_benchmark_with_shuffle           144 ns          144 ns      4848775
-```
+### AI 的使用
 
-```
-分配器（顺序释放）:
-----------------------------------------------------------------------------------------------------------
-Benchmark                                                                Time             CPU   Iterations
-----------------------------------------------------------------------------------------------------------
-malloc_free_benchmark_without_shuffle                                  679 ns          655 ns      1083339
-heap_allocated_aligned_pool_benchmark_without_shuffle                  127 ns          125 ns      5411608
-heap_allocated_aligned_pool_impl_list_benchmark_without_shuffle        141 ns          138 ns      5159772
-```
+本项目允许并鼓励使用 AI 助手参与开发。每次开启新的 AI 会话时，请先让 AI 通读
+[CONVENTIONS_FOR_AI.md](./CONVENTIONS_FOR_AI.md)。该文件是专门面向 AI 代理编写的精简高密度参考资料，
+涵盖了本项目的分层架构、构建流程、测试目录结构、内存模型以及命名规范等关键约定。
+
+AI 完成编辑后，请**务必仔细审阅**每一处改动，确认你完全理解它所做的事情，然后再提交。

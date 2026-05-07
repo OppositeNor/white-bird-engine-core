@@ -47,6 +47,16 @@ enum class EncodeType {
     UTF32BE
 };
 
+// Type of access.
+enum class AccessType : uint8_t {
+    // Read only.
+    READ_ONLY = 0b01,
+    // Write only.
+    WRITE_ONLY = 0b10,
+    // Read or write.
+    READ_WRITE = 0b11
+};
+
 /**
  * @brief Get the size after alignment.
  *
@@ -68,7 +78,8 @@ using TypeID = uint32_t;
  * @return The hash code of the string.
  */
 consteval HashCode static_hash(const char* p_str) {
-    // from https://stackoverflow.com/questions/2111667/compile-time-string-hashing
+    // from
+    // https://stackoverflow.com/questions/2111667/compile-time-string-hashing
     return *p_str ? static_cast<uint32_t>(*p_str) + 33 * static_hash(p_str + 1) : 5381;
 }
 
@@ -79,7 +90,8 @@ consteval HashCode static_hash(const char* p_str) {
  * @return The hash code of the string.
  */
 constexpr HashCode dynam_hash(const char* p_str) {
-    // from https://stackoverflow.com/questions/2111667/compile-time-string-hashing
+    // from
+    // https://stackoverflow.com/questions/2111667/compile-time-string-hashing
     return *p_str ? static_cast<uint32_t>(*p_str) + 33 * dynam_hash(p_str + 1) : 5381;
 }
 
@@ -90,7 +102,8 @@ constexpr HashCode dynam_hash(const char* p_str) {
  * @return The hash code of the value.
  */
 consteval HashCode static_hash(int32_t p_val) {
-    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    // from
+    // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
     p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3b;
     p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3b;
     p_val = (p_val >> 16) ^ p_val;
@@ -104,7 +117,8 @@ consteval HashCode static_hash(int32_t p_val) {
  * @return The hash code of the value.
  */
 constexpr HashCode dynam_hash(int32_t p_val) {
-    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    // from
+    // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
     p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3b;
     p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3b;
     p_val = (p_val >> 16) ^ p_val;
@@ -118,7 +132,8 @@ constexpr HashCode dynam_hash(int32_t p_val) {
  * @return The hash code of the value.
  */
 consteval HashCode static_hash(uint32_t p_val) {
-    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    // from
+    // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
     p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3bU;
     p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3bU;
     p_val = (p_val >> 16) ^ p_val;
@@ -132,7 +147,8 @@ consteval HashCode static_hash(uint32_t p_val) {
  * @return The hash code of the value.
  */
 constexpr HashCode dynam_hash(uint32_t p_val) {
-    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    // from
+    // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
     p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3bU;
     p_val = ((p_val >> 16) ^ p_val) * 0x45d9f3bU;
     p_val = (p_val >> 16) ^ p_val;
@@ -146,7 +162,8 @@ constexpr HashCode dynam_hash(uint32_t p_val) {
  * @return The hash code of the value.
  */
 consteval HashCode static_hash(int64_t p_val) {
-    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    // from
+    // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
     p_val = (p_val ^ (p_val >> 30)) * 0xbf58476d1ce4e5b9LL; // NOLINT
     p_val = (p_val ^ (p_val >> 27)) * 0x94d049bb133111ebLL; // NOLINT
     p_val = p_val ^ (p_val >> 31);
@@ -160,7 +177,8 @@ consteval HashCode static_hash(int64_t p_val) {
  * @return The hash code of the value.
  */
 constexpr HashCode dynam_hash(int64_t p_val) {
-    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    // from
+    // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
     p_val = (p_val ^ (p_val >> 30)) * 0xbf58476d1ce4e5b9LL; // NOLINT
     p_val = (p_val ^ (p_val >> 27)) * 0x94d049bb133111ebLL; // NOLINT
     p_val = p_val ^ (p_val >> 31);
@@ -174,7 +192,8 @@ constexpr HashCode dynam_hash(int64_t p_val) {
  * @return The hash code of the value.
  */
 consteval HashCode static_hash(uint64_t p_val) {
-    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    // from
+    // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
     p_val = (p_val ^ (p_val >> 30)) * 0xbf58476d1ce4e5b9ULL;
     p_val = (p_val ^ (p_val >> 27)) * 0x94d049bb133111ebULL;
     p_val = p_val ^ (p_val >> 31);
@@ -188,7 +207,8 @@ consteval HashCode static_hash(uint64_t p_val) {
  * @return The hash code of the value.
  */
 constexpr HashCode dynam_hash(uint64_t p_val) {
-    // from https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
+    // from
+    // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key#12996028
     p_val = (p_val ^ (p_val >> 30)) * 0xbf58476d1ce4e5b9ULL;
     p_val = (p_val ^ (p_val >> 27)) * 0x94d049bb133111ebULL;
     p_val = p_val ^ (p_val >> 31);
@@ -351,7 +371,8 @@ inline std::vector<char> load_binary_file(const char* p_path) {
  *
  * @todo Test
  * @param p_path The path tot he binary file.
- * @param p_result The result data. Set to nullptr if only interested with file size.
+ * @param p_result The result data. Set to nullptr if only interested with file
+ * size.
  * @param p_size The size of the file. Ignored if p_result is not nullptr.
  */
 inline void load_binary_file(const char* p_path, void* p_result, size_t* p_size) {
@@ -415,7 +436,8 @@ inline std::string remove_hashtag_comments(std::string p_str) {
 }
 
 /**
- * @brief Hash a pointer in compile time. (Usually won't be used, since pointers are usually dynamic).
+ * @brief Hash a pointer in compile time. (Usually won't be used, since pointers
+ * are usually dynamic).
  *
  * @param p_ptr The pointer to be hashed.
  * @return The hash code of the pointer.
@@ -548,4 +570,3 @@ WBE_DECL_CRTP_CONCEPT(BufferBase);
 
 } // namespace WhiteBirdEngine
 #endif
-

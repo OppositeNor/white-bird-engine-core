@@ -15,8 +15,8 @@
 #ifndef WBE_FILE_HEAP_ALLOCATOR_ALIGNED_POOL_HH
 #define WBE_FILE_HEAP_ALLOCATOR_ALIGNED_POOL_HH
 
-#include "core/allocator/i_allocator.hh"
 #include "core/allocator/heap_allocator_aligned.hh"
+#include "core/allocator/i_allocator.hh"
 #include "utils/defs.hh"
 #include <cstddef>
 #include <cstdint>
@@ -47,8 +47,8 @@ struct AllocatorTrait<class HeapAllocatorAlignedPool> final : public AllocatorTr
  */
 class HeapAllocatorAlignedPool final : public HeapAllocatorAligned {
 public:
-    HeapAllocatorAlignedPool()
-        : HeapAllocatorAlignedPool(WBE_KiB(64UL)) {}
+    HeapAllocatorAlignedPool() : HeapAllocatorAlignedPool(WBE_KiB(64UL)) {
+    }
     virtual ~HeapAllocatorAlignedPool() override;
     HeapAllocatorAlignedPool(const HeapAllocatorAlignedPool&) = delete;
     HeapAllocatorAlignedPool(HeapAllocatorAlignedPool&&) = delete;
@@ -132,7 +132,6 @@ public:
     }
 
 private:
-
     struct IdleListNode {
         size_t size = 0;
         char* mem_start = nullptr;

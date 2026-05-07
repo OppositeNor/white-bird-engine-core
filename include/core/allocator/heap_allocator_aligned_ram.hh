@@ -15,13 +15,14 @@
 #ifndef WBE_FILE_HEAP_ALLOCATOR_ALIGNED_RAM_HH
 #define WBE_FILE_HEAP_ALLOCATOR_ALIGNED_RAM_HH
 
-#include "core/allocator/i_allocator.hh"
 #include "core/allocator/heap_allocator_aligned.hh"
+#include "core/allocator/i_allocator.hh"
 #include "core/logging/log.hh"
 #include "utils/defs.hh"
 #include "utils/utils.hh"
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <set>
 #include <sstream>
 #include <unordered_map>
@@ -50,7 +51,6 @@ struct AllocatorTrait<class HeapAllocatorAlignedRAM> {
  */
 class HeapAllocatorAlignedRAM final : public HeapAllocatorAligned {
 public:
-
     HeapAllocatorAlignedRAM() = default;
     virtual ~HeapAllocatorAlignedRAM() override {
         if (!allocated.empty()) {
@@ -70,7 +70,7 @@ public:
             return MEM_NULL;
         }
         size_t align_size = get_align_size(p_size, p_alignment);
-        void* mem = aligned_alloc(p_alignment, align_size);
+        void* mem = aligned_alloc(p_alignment, align_size); // NOLINT
         MemID result = reinterpret_cast<MemID>(mem);
         allocated.insert(result);
         size_map[result] = align_size;
@@ -123,8 +123,7 @@ public:
             first = false;
             ss << "{"
                << "\"mem_id\":" << mem_id << ","
-               << "\"size\":" << size_map.at(mem_id)
-               << "}";
+               << "\"size\":" << size_map.at(mem_id) << "}";
         }
         ss << "]";
         ss << "}";

@@ -15,11 +15,9 @@
 #ifndef WBE_FILE_WORKER_HH
 #define WBE_FILE_WORKER_HH
 
-#include "core/job/job.hh"
+#include "core/core_utils.hh"
 #include "core/job/job_buffer_ring_mpsc.hh"
 #include "core/job/job_handler.hh"
-#include "core/core_utils.hh"
-#include "core/memory/reference_strong.hh"
 #include "core/memory/unique.hh"
 #include "platform/file_system/path.hh"
 #include "utils/defs.hh"
@@ -39,7 +37,6 @@ namespace WhiteBirdEngine {
  */
 class Worker final : public ISingleton<Worker>, public JobHandler {
 public:
-
     /**
      * @brief Maximum number of tasks that the worker could handle.
      */
@@ -50,10 +47,9 @@ public:
     /**
      * @brief Constructor.
      *
-     * @param p_allocator The allocator to allocate 
+     * @param p_allocator The allocator to allocate
      */
-    Worker()
-        : allocator(WBE_MiB(0.5)) {
+    Worker() : allocator(WBE_MiB(0.5)) {
         singleton = this;
         job_buffer = make_unique<JobBufferRingMPSC>(&allocator, &allocator, WORKER_MAX_TASK);
     }
@@ -64,9 +60,7 @@ public:
         singleton = nullptr;
     }
 
-    virtual void add_job(Ref<Job> p_job) override;
-    virtual void add_job(const std::function<void()>& p_job) override;
-    virtual void add_job(std::function<void()>&& p_job) override;
+    virtual void add_job(std::function<void()> p_job) override;
 
     static Worker* get_singleton() {
         return singleton;
@@ -121,4 +115,3 @@ private:
 
 } // namespace WhiteBirdEngine
 #endif
-

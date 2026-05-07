@@ -56,13 +56,8 @@ public:
 
         explicit operator std::string() const {
             std::stringstream ss;
-            ss << R"({"channel":")" << get_label_name(channel) << '\"'
-               << R"(,"message":")" << message << '\"'
-               << R"(,"start_time":)" << start_time
-               << R"(,"delta":)" << delta
-               << R"(,"file":")" << file << '\"'
-               << R"(,"line":)" << line
-               << R"(})";
+            ss << R"({"channel":")" << get_label_name(channel) << '\"' << R"(,"message":")" << message << '\"' << R"(,"start_time":)"
+               << start_time << R"(,"delta":)" << delta << R"(,"file":")" << file << '\"' << R"(,"line":)" << line << R"(})";
             return ss.str();
         }
     };
@@ -71,7 +66,8 @@ public:
      * @brief Push a profiling data to the profile stash.
      *
      * @param p_channel The channel to push the data to.
-     * @param p_delta The delta time that's been pushed into the profiler in seconds.
+     * @param p_delta The delta time that's been pushed into the profiler in
+     * seconds.
      * @param p_file The source file that the proflier is created.
      * @param p_line The line number where the profiler is created.
      */
@@ -81,7 +77,8 @@ public:
      * @brief Push a profiling data to the profile stash.
      *
      * @param p_channel The channel to push the data to.
-     * @param p_delta The delta time that's been pushed into the profiler in seconds.
+     * @param p_delta The delta time that's been pushed into the profiler in
+     * seconds.
      * @param p_file The source file that the proflier is created.
      * @param p_line The line number where the profiler is created.
      */
@@ -104,7 +101,6 @@ private:
     static const std::string& get_label_name(HashCode p_label) {
         return EngineCore::get_singleton()->label_manager->get_label_name(p_label);
     }
-
 };
 
 } // namespace WhiteBirdEngine

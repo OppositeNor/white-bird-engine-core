@@ -97,7 +97,6 @@ public:
 
 private:
     std::set<MemID> allocated;
-
 };
 
 } // namespace WhiteBirdEngine

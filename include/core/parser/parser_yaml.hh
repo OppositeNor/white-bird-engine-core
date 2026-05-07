@@ -14,19 +14,25 @@
 */
 #ifndef WBE_FILE_PARSER_YAML_HH
 #define WBE_FILE_PARSER_YAML_HH
+#include "glm/ext/vector_float2.hpp"
+#include "glm/ext/vector_float3.hpp"
+#include "glm/ext/vector_float4.hpp"
+#include "glm/fwd.hpp"
 #include "parser.hh"
 #include "platform/file_system/path.hh"
 #include "utils/utils.hh"
+#include "yaml-cpp/node/node.h"
+#include "yaml-cpp/node/parse.h"
 #include <concepts>
 #include <format>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
-#include <stdexcept>
-#include <vector>
 #include <utility>
+#include <vector>
 #include <yaml-cpp/yaml.h>
 
 namespace WhiteBirdEngine {
@@ -40,13 +46,14 @@ class YAMLData : public ParserData<YAMLData> {
     using Yaml = YAML::Node;
     friend class ParserYAML;
     friend std::ostream& operator<<(std::ostream& p_ostream, const YAMLData& p_parser);
+
 public:
     YAMLData() = default;
     ~YAMLData() = default;
-    YAMLData(const YAMLData& p_other)
-        : node(p_other.node) {}
-    YAMLData(YAMLData&& p_other) noexcept
-        : node(p_other.node) {}
+    YAMLData(const YAMLData& p_other) : node(p_other.node) {
+    }
+    YAMLData(YAMLData&& p_other) noexcept : node(p_other.node) {
+    }
     YAMLData& operator=(const YAMLData& p_other) {
         if (&p_other == this) {
             return *this;
@@ -61,10 +68,10 @@ public:
         node = p_other.node;
         return *this;
     }
-    YAMLData(const Yaml& p_node)
-        : node(p_node) {}
-    YAMLData(YAML::Node&& p_node)
-        : node(p_node) {}
+    YAMLData(const Yaml& p_node) : node(p_node) {
+    }
+    YAMLData(YAML::Node&& p_node) : node(p_node) {
+    }
 
     template <typename T>
     void set_value(const std::string& p_key, T&& p_value) {
@@ -75,9 +82,11 @@ public:
             using BufferT = std::remove_cvref_t<T>;
             std::string result = p_value.buffer;
             if (result.size() > BufferT::BUFFER_SIZE - 1) {
-                throw std::runtime_error(std::format(
-                    "Failed to get string value: {}. Buffer capacity: {}. String length: {} (without NUL terminator).",
-                    result, BufferT::BUFFER_SIZE, result.size()));
+                throw std::runtime_error(std::format("Failed to get string value: {}. Buffer capacity: {}. "
+                                                     "String length: {} (without NUL terminator).",
+                    result,
+                    BufferT::BUFFER_SIZE,
+                    result.size()));
             }
             node[p_key] = result;
         } else if constexpr (std::same_as<Type, glm::vec2>) {
@@ -85,8 +94,7 @@ public:
                 // Support for UV notation.
                 node[p_key]["u"] = p_value.x;
                 node[p_key]["v"] = p_value.y;
-            }
-            else {
+            } else {
                 node[p_key]["x"] = p_value.x;
                 node[p_key]["y"] = p_value.y;
             }
@@ -124,9 +132,11 @@ public:
             using BufferT = std::remove_cvref_t<T>;
             std::string result = p_value.buffer;
             if (result.size() > BufferT::BUFFER_SIZE - 1) {
-                throw std::runtime_error(std::format(
-                    "Failed to get string value: {}. Buffer capacity: {}. String length: {} (without NUL terminator).",
-                    result, BufferT::BUFFER_SIZE, result.size()));
+                throw std::runtime_error(std::format("Failed to get string value: {}. Buffer capacity: {}. "
+                                                     "String length: {} (without NUL terminator).",
+                    result,
+                    BufferT::BUFFER_SIZE,
+                    result.size()));
             }
             node = result;
         } else if constexpr (std::same_as<Type, glm::vec2>) {
@@ -135,8 +145,7 @@ public:
                 // Support for UV notation.
                 node["u"] = p_value.x;
                 node["v"] = p_value.y;
-            }
-            else {
+            } else {
                 node["x"] = p_value.x;
                 node["y"] = p_value.y;
             }
@@ -170,16 +179,17 @@ public:
         return val;
     }
 
-
     template <typename T>
     void get(T& p_value) const {
         if constexpr (BufferBaseConcept<T>) {
             using BufferT = std::remove_cvref_t<T>;
             std::string result = node.as<std::string>();
             if (result.size() > BufferT::BUFFER_SIZE - 1) {
-                throw std::runtime_error(std::format(
-                    "Failed to get string value: {}. Buffer capacity: {}. String length: {} (without NUL terminator).",
-                    result, BufferT::BUFFER_SIZE, result.size()));
+                throw std::runtime_error(std::format("Failed to get string value: {}. Buffer capacity: {}. "
+                                                     "String length: {} (without NUL terminator).",
+                    result,
+                    BufferT::BUFFER_SIZE,
+                    result.size()));
             }
             strncpy(p_value.buffer, result.data(), BufferT::BUFFER_SIZE - 1);
             p_value.buffer[BufferT::BUFFER_SIZE - 1] = '\0';
@@ -189,26 +199,13 @@ public:
                 p_value.emplace_back(elem);
             }
         } else if constexpr (std::same_as<T, glm::vec2>) {
-            p_value = glm::vec2(
-                node["x"].as<float>(),
-                node["y"].as<float>());
+            p_value = glm::vec2(node["x"].as<float>(), node["y"].as<float>());
         } else if constexpr (std::same_as<T, glm::vec3>) {
-            p_value = glm::vec3(
-                node["x"].as<float>(),
-                node["y"].as<float>(),
-                node["z"].as<float>());
+            p_value = glm::vec3(node["x"].as<float>(), node["y"].as<float>(), node["z"].as<float>());
         } else if constexpr (std::same_as<T, glm::vec4>) {
-            p_value = glm::vec4(
-                node["x"].as<float>(),
-                node["y"].as<float>(),
-                node["z"].as<float>(),
-                node["w"].as<float>());
+            p_value = glm::vec4(node["x"].as<float>(), node["y"].as<float>(), node["z"].as<float>(), node["w"].as<float>());
         } else if constexpr (std::same_as<T, glm::quat>) {
-            p_value = glm::quat(
-                node["x"].as<float>(),
-                node["y"].as<float>(),
-                node["z"].as<float>(),
-                node["w"].as<float>());
+            p_value = glm::quat(node["x"].as<float>(), node["y"].as<float>(), node["z"].as<float>(), node["w"].as<float>());
         } else if constexpr (std::same_as<T, YAMLData>) {
             p_value = YAMLData(node.as<Yaml>());
         } else {
@@ -222,9 +219,11 @@ public:
             using BufferT = std::remove_cvref_t<T>;
             std::string result = node[p_key].as<std::string>();
             if (result.size() > BufferT::BUFFER_SIZE - 1) {
-                throw std::runtime_error(std::format(
-                    "Failed to get string value: {}. Buffer capacity: {}. String length: {} (without NUL terminator).",
-                    result, BufferT::BUFFER_SIZE, result.size()));
+                throw std::runtime_error(std::format("Failed to get string value: {}. Buffer capacity: {}. "
+                                                     "String length: {} (without NUL terminator).",
+                    result,
+                    BufferT::BUFFER_SIZE,
+                    result.size()));
             }
             strncpy(p_value.buffer, result.data(), BufferT::BUFFER_SIZE - 1);
             p_value.buffer[BufferT::BUFFER_SIZE - 1] = '\0';
@@ -235,20 +234,12 @@ public:
             }
             p_value = result;
         } else if constexpr (std::same_as<T, glm::vec2>) {
-            p_value = glm::vec2(
-                node[p_key]["x"].as<float>(),
-                node[p_key]["y"].as<float>());
+            p_value = glm::vec2(node[p_key]["x"].as<float>(), node[p_key]["y"].as<float>());
         } else if constexpr (std::same_as<T, glm::vec3>) {
-            p_value = glm::vec3(
-                node[p_key]["x"].as<float>(),
-                node[p_key]["y"].as<float>(),
-                node[p_key]["z"].as<float>());
+            p_value = glm::vec3(node[p_key]["x"].as<float>(), node[p_key]["y"].as<float>(), node[p_key]["z"].as<float>());
         } else if constexpr (std::same_as<T, glm::vec4>) {
             p_value = glm::vec4(
-                node[p_key]["x"].as<float>(),
-                node[p_key]["y"].as<float>(),
-                node[p_key]["z"].as<float>(),
-                node[p_key]["w"].as<float>());
+                node[p_key]["x"].as<float>(), node[p_key]["y"].as<float>(), node[p_key]["z"].as<float>(), node[p_key]["w"].as<float>());
         } else if constexpr (std::same_as<T, YAMLData>) {
             p_value = YAMLData(node[p_key].as<Yaml>());
         } else {
@@ -284,16 +275,16 @@ inline std::ostream& operator<<(std::ostream& p_ostream, const YAMLData& p_parse
  */
 class ParserYAML : public Parser<ParserYAML> {
     using Yaml = YAML::Node;
-public:
 
+public:
     using DataType = YAMLData;
 
     ParserYAML() = default;
     virtual ~ParserYAML() = default;
-    ParserYAML(const ParserYAML& p_other)
-        : data(p_other.data) {}
-    ParserYAML(ParserYAML&& p_other) noexcept
-        : data(std::move(p_other.data) ){}
+    ParserYAML(const ParserYAML& p_other) : data(p_other.data) {
+    }
+    ParserYAML(ParserYAML&& p_other) noexcept : data(std::move(p_other.data)) {
+    }
     ParserYAML& operator=(const ParserYAML& p_other) {
         if (&p_other == this) {
             return *this;

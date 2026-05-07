@@ -15,23 +15,23 @@
 #ifndef WBE_FILE_HEAP_ALLOCATOR_ATOMIC_ALIGNED_POOL_IMPL_LIST_HH
 #define WBE_FILE_HEAP_ALLOCATOR_ATOMIC_ALIGNED_POOL_IMPL_LIST_HH
 
-#include "core/allocator/i_allocator.hh"
 #include "core/allocator/heap_allocator_aligned.hh"
+#include "core/allocator/i_allocator.hh"
 #ifdef _DEBUG
 #include "core/debug_utils/debug_mutex.hh"
 #endif
 #include "utils/defs.hh"
+#include <boost/thread/lock_types.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
-#include <boost/thread/lock_types.hpp>
 #include <string>
 
-#define WBE_HAAAPIL_GET_HEADER_SIZE(p_header) p_header & TOTAL_SIZE_MASK
+#define WBE_HAAAPIL_GET_HEADER_SIZE(p_header) p_header& TOTAL_SIZE_MASK
 #define WBE_HAAAPIL_GET_CHUNK_SIZE(p_chunk) WBE_HAAAPIL_GET_HEADER_SIZE(*reinterpret_cast<Header*>(p_chunk))
 #define WBE_HAAAPIL_SET_HEADER(p_header, p_head_type, p_size) (*(p_header) = (((Header)(p_head_type) << 60) | (p_size)))
-#define WBE_HAAAPIL_SET_CHUNK_HEADER(p_chunk, p_type, p_size) WBE_HAAAPIL_SET_HEADER(reinterpret_cast<Header*>(p_chunk), (p_type), (p_size))
-
+#define WBE_HAAAPIL_SET_CHUNK_HEADER(p_chunk, p_type, p_size)                                                               \
+    WBE_HAAAPIL_SET_HEADER(reinterpret_cast<Header*>(p_chunk), (p_type), (p_size))
 
 namespace WhiteBirdEngine {
 
@@ -50,14 +50,16 @@ struct AllocatorTrait<class HeapAllocatorAtomicAlignedPoolImplicitList> final : 
 
 /**
  * @class HeapAllocatorAtomicAlignedPoolImplicitList
- * @brief Heap allocator atomic pool with memory alignment support, with an implicit list.
+ * @brief Heap allocator atomic pool with memory alignment support, with an
+ * implicit list.
  */
 class HeapAllocatorAtomicAlignedPoolImplicitList final : public HeapAllocatorAligned {
 private:
     using Header = uint64_t;
+
 public:
-    HeapAllocatorAtomicAlignedPoolImplicitList()
-    : HeapAllocatorAtomicAlignedPoolImplicitList(WBE_KiB(64)) {}
+    HeapAllocatorAtomicAlignedPoolImplicitList() : HeapAllocatorAtomicAlignedPoolImplicitList(WBE_KiB(64)) {
+    }
     virtual ~HeapAllocatorAtomicAlignedPoolImplicitList() override;
     HeapAllocatorAtomicAlignedPoolImplicitList(const HeapAllocatorAtomicAlignedPoolImplicitList&) = delete;
     HeapAllocatorAtomicAlignedPoolImplicitList(HeapAllocatorAtomicAlignedPoolImplicitList&&) = delete;
@@ -148,7 +150,8 @@ public:
     bool is_in_pool(MemID p_mem_id) const;
 
     /**
-     * @brief Check if the pool is broken. Throws an error if the pool is broken.
+     * @brief Check if the pool is broken. Throws an error if the pool is
+     * broken.
      */
     void check_broken() const {
         boost::shared_lock lock(mutex);
@@ -156,7 +159,6 @@ public:
     }
 
 private:
-
     size_t size;
     char* mem_chunk;
     mutable char* possible_valid;
@@ -200,6 +202,5 @@ private:
 #undef WBE_HAAAPIL_GET_CHUNK_SIZE
 #undef WBE_HAAAPIL_SET_HEADER
 #undef WBE_HAAAPIL_SET_CHUNK_HEADER
-
 
 #endif

@@ -18,8 +18,8 @@
 #include "core/allocator/i_allocator.hh"
 #include "core/memory/reference_raw.hh"
 #include "core/reflection/reflection_defs.hh"
-#include "glm/ext/vector_float3.hpp"
 #include "glm/ext/vector_float2.hpp"
+#include "glm/ext/vector_float3.hpp"
 #include <cstdint>
 
 namespace WhiteBirdEngine {

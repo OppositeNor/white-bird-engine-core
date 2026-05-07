@@ -16,12 +16,12 @@
 #define WBE_FILE_HEAP_ALLOCATOR_ATOMIC_ALIGNED_POOL_HH
 
 #include "boost/thread/pthread/shared_mutex.hpp"
-#include "core/allocator/i_allocator.hh"
 #include "core/allocator/heap_allocator_aligned.hh"
+#include "core/allocator/i_allocator.hh"
 #include "utils/defs.hh"
 #include <boost/thread/lock_types.hpp>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <memory>
 #include <string>
@@ -41,7 +41,6 @@ struct AllocatorTrait<class HeapAllocatorAtomicAlignedPool> final : public Alloc
     WBE_TRAIT_REQUIRES(AllocatorTraitConcept);
 };
 
-
 /**
  * @class HeapAllocatorAtomicAlignedPool
  * @brief Heap allocator aligned pool atomic version.
@@ -49,8 +48,8 @@ struct AllocatorTrait<class HeapAllocatorAtomicAlignedPool> final : public Alloc
  */
 class HeapAllocatorAtomicAlignedPool final : public HeapAllocatorAligned {
 public:
-    HeapAllocatorAtomicAlignedPool()
-        : HeapAllocatorAtomicAlignedPool(WBE_KiB(64)) {}
+    HeapAllocatorAtomicAlignedPool() : HeapAllocatorAtomicAlignedPool(WBE_KiB(64)) {
+    }
     virtual ~HeapAllocatorAtomicAlignedPool() override;
     WBE_R6_NDCD_DELETE_COPY_MOVE(HeapAllocatorAtomicAlignedPool)
 
@@ -82,8 +81,9 @@ public:
             return nullptr;
         }
         WBE_DEBUG_ASSERT(is_in_pool(p_id));
-        // getting the resource is not protected by a lock. The user should protect a resource's use
-        // from allocation and deallocation by themselves.
+        // getting the resource is not protected by a lock. The user should
+        // protect a resource's use from allocation and deallocation by
+        // themselves.
         return reinterpret_cast<void*>(p_id);
     }
 
@@ -112,7 +112,6 @@ public:
 
     size_t get_remain_size() const;
 
-
     /**
      * @brief Is the memory ID in this pool
      *
@@ -133,7 +132,6 @@ public:
     }
 
 private:
-
     bool is_empty_unguarded() const {
         return idle_list_head != nullptr && idle_list_head->size == size;
     }

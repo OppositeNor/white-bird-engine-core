@@ -104,6 +104,6 @@ private:
 };
 
 #endif
-}  // namespace WhiteBirdEngine
+} // namespace WhiteBirdEngine
 
 #endif

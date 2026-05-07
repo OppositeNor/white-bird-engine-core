@@ -34,10 +34,10 @@
 
 namespace WhiteBirdEngine {
 
-HeapAllocatorAlignedPool::HeapAllocatorAlignedPool(size_t p_size)
-    : size(p_size) {
+HeapAllocatorAlignedPool::HeapAllocatorAlignedPool(size_t p_size) : size(p_size) {
     if (p_size > MAX_TOTAL_SIZE) {
-        throw std::runtime_error("Failed to create pool: size: " + std::to_string(p_size) + " exceeds maximum: " + std::to_string(MAX_TOTAL_SIZE) + ".");
+        throw std::runtime_error("Failed to create pool: size: " + std::to_string(p_size) +
+                                 " exceeds maximum: " + std::to_string(MAX_TOTAL_SIZE) + ".");
     }
     mem_chunk = static_cast<char*>(malloc(p_size)); // NOLINT
     if (mem_chunk == nullptr) {
@@ -76,24 +76,27 @@ MemID HeapAllocatorAlignedPool::allocate(size_t p_size, size_t p_alignment) {
     while (*valid_idle_node != nullptr) {
         // Find the aligned starting point.
         uintptr_t proxy_mem_start_addr = reinterpret_cast<uintptr_t>((*valid_idle_node)->mem_start) + HEADER_SIZE;
-        char* idle_node_mem_start = reinterpret_cast<char*>(
-            (proxy_mem_start_addr / p_alignment) * p_alignment == proxy_mem_start_addr ?
-                proxy_mem_start_addr : (proxy_mem_start_addr / p_alignment + 1) * p_alignment
-        ) - HEADER_SIZE;
+        char* idle_node_mem_start = reinterpret_cast<char*>((proxy_mem_start_addr / p_alignment) * p_alignment == proxy_mem_start_addr
+                                                                ? proxy_mem_start_addr
+                                                                : (proxy_mem_start_addr / p_alignment + 1) * p_alignment) -
+                                    HEADER_SIZE;
         // If idle node valid, insert.
         if (idle_node_mem_start + aligned_size <= (*valid_idle_node)->mem_start + (*valid_idle_node)->size) {
             void* result_loc = acquire_memory(*valid_idle_node, idle_node_mem_start, aligned_size);
             MemID result_id = reinterpret_cast<MemID>(result_loc) + HEADER_SIZE;
             *static_cast<Header*>(result_loc) = aligned_size;
-            internal_fragmentation_tracker
-                = std::max(internal_fragmentation_tracker, reinterpret_cast<uintptr_t>(result_loc) + aligned_size - reinterpret_cast<uint64_t>(mem_chunk));
+            internal_fragmentation_tracker = std::max(internal_fragmentation_tracker,
+                reinterpret_cast<uintptr_t>(result_loc) + aligned_size - reinterpret_cast<uint64_t>(mem_chunk));
             return result_id;
         }
         valid_idle_node = &((*valid_idle_node)->next);
     }
     std::string err_msg = "Failed to allocate memory: not enough space for memory pool.\n"
-        "Trying to allocate: " + std::to_string(aligned_size) + " bytes.\n"
-        "Pool status: " + static_cast<std::string>(*this);
+                          "Trying to allocate: " +
+                          std::to_string(aligned_size) +
+                          " bytes.\n"
+                          "Pool status: " +
+                          static_cast<std::string>(*this);
     throw std::runtime_error(err_msg);
 }
 
@@ -125,8 +128,7 @@ void* HeapAllocatorAlignedPool::acquire_memory(std::unique_ptr<IdleListNode>& p_
             p_node->size = p_node->next->size;
             p_node->mem_start = p_node->next->mem_start;
             p_node->next = std::move(p_node->next->next);
-        }
-        else {
+        } else {
             p_node->mem_start += p_mem_size;
         }
         return node_mem_start;
@@ -167,8 +169,7 @@ void HeapAllocatorAlignedPool::insert_free_memory(IdleListNode* p_node_before_in
     p_node_before_insert->next = std::move(insert_node);
     if (combine_idle_with_next(p_node_before_insert)) {
         combine_idle_with_next(p_node_before_insert);
-    }
-    else if (p_node_before_insert->next != nullptr) {
+    } else if (p_node_before_insert->next != nullptr) {
         combine_idle_with_next(p_node_before_insert->next.get());
     }
 }
@@ -195,7 +196,6 @@ std::unique_ptr<HeapAllocatorAlignedPool::IdleListNode>& HeapAllocatorAlignedPoo
     throw std::runtime_error("Unreachable code.");
 }
 
-
 size_t HeapAllocatorAlignedPool::get_remain_size() const {
     IdleListNode* node = idle_list_head.get();
     size_t total = 0;
@@ -216,11 +216,9 @@ bool HeapAllocatorAlignedPool::is_in_pool(MemID p_mem_id) const {
         if (curr != nullptr && curr->mem_start == tracker) {
             tracker += curr->size;
             curr = curr->next.get();
-        }
-        else if (p_mem_id == reinterpret_cast<MemID>(tracker) + HEADER_SIZE) {
+        } else if (p_mem_id == reinterpret_cast<MemID>(tracker) + HEADER_SIZE) {
             return true;
-        }
-        else {
+        } else {
             size_t chunk_size = WBE_GET_CHUNK_SIZE(tracker);
             WBE_DEBUG_ASSERT(chunk_size != 0);
             tracker += chunk_size;
@@ -243,9 +241,8 @@ HeapAllocatorAlignedPool::operator std::string() const {
         }
         first = false;
         ss << "{"
-            << R"("begin":)" << (node->mem_start - mem_chunk) << ","
-            << R"("size":)" << node->size
-            << "}";
+           << R"("begin":)" << (node->mem_start - mem_chunk) << ","
+           << R"("size":)" << node->size << "}";
         node = node->next.get();
     }
     ss << "]";

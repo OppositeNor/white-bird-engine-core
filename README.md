@@ -1,12 +1,10 @@
 # White Bird Engine
 
-> A free game engine.
+> A free game engine built for rhythm game development.
 >
-> Licensed under [Apache License Version 2.0](https://github.com/OppositeNor/white-bird-engine-core/blob/master/LICENSE).
+> Licensed under [Apache License Version 2.0](https://github.com/OppositeNor/white-bird-engine/blob/main/LICENSE).
 
 - [简体中文](./README.zh-Hans.md)
-
-This is the repository for the core layer of White Bird Engine. The full engine is still under development.
 
 ## How to build
 
@@ -28,7 +26,7 @@ git submodule update --init --recursive
 Install build dependencies:
 
 ```sh
-sudo pacman -S cmake clang ninja directx-shader-compiler
+sudo pacman -S cmake clang ninja
 ```
 
 It is suggested to use Anaconda for setting up the build environment.
@@ -69,24 +67,14 @@ python ./build.py -t release-gcc    # Release target with GCC compiler
 python ./build.py -t deploy         # Deploy target with GCC compiler
 ```
 
-## Benchmark results
+## Contribution
 
-```
-Allocators (shuffle destruction order):
-----------------------------------------------------------------------------------------------------------
-Benchmark                                                                Time             CPU   Iterations
-----------------------------------------------------------------------------------------------------------
-malloc_free_benchmark_with_shuffle                                     679 ns          676 ns       939593
-heap_allocated_aligned_pool_benchmark_with_shuffle                    1460 ns         1456 ns       468061
-heap_allocated_aligned_pool_impl_list_benchmark_with_shuffle           144 ns          144 ns      4848775
-```
+### Use of AI
 
-```
-Allocators (ordered destruction):
-----------------------------------------------------------------------------------------------------------
-Benchmark                                                                Time             CPU   Iterations
-----------------------------------------------------------------------------------------------------------
-malloc_free_benchmark_without_shuffle                                  679 ns          655 ns      1083339
-heap_allocated_aligned_pool_benchmark_without_shuffle                  127 ns          125 ns      5411608
-heap_allocated_aligned_pool_impl_list_benchmark_without_shuffle        141 ns          138 ns      5159772
-```
+Use of AI assistants is allowed and encouraged for this project. At the start of every new AI session, please have the
+agent read [CONVENTIONS_FOR_AI.md](./CONVENTIONS_FOR_AI.md) first. That file is a compact, high-density reference written
+specifically for AI agents and covers the project's layered architecture, build workflow, test layout, memory model, and
+naming rules.
+
+After the AI finishes editing, **carefully review** every change and make sure you understand exactly what it did before
+committing.

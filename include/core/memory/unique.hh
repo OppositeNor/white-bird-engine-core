@@ -15,8 +15,8 @@
 #ifndef WBE_FILE_UNIQUE_HH
 #define WBE_FILE_UNIQUE_HH
 
-#include "core/allocator/i_allocator.hh"
 #include "core/allocator/heap_allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "utils/defs.hh"
 #include <concepts>
 #include <cstddef>
@@ -34,17 +34,18 @@ template <typename T, typename AllocType = HeapAllocator>
 class Unique {
     template <typename T1, typename AllocType1>
     friend class Unique;
+    template <typename T1, typename AllocType1, bool AllowDestruct>
+    friend class RefRaw;
 
 public:
-    Unique()
-        : mem_id(MEM_NULL), allocator(nullptr) {}
+    Unique() : mem_id(MEM_NULL), allocator(nullptr) {
+    }
     ~Unique() {
         reset();
     }
     // Unique is not copyable.
     Unique(const Unique&) = delete;
-    Unique(Unique&& p_other) noexcept
-        : mem_id(p_other.mem_id), allocator(p_other.allocator) {
+    Unique(Unique&& p_other) noexcept : mem_id(p_other.mem_id), allocator(p_other.allocator) {
         p_other.mem_id = MEM_NULL;
     }
     Unique& operator=(const Unique&) = delete;
@@ -58,8 +59,7 @@ public:
 
     template <typename T1, typename AllocType1>
         requires std::convertible_to<T1*, T*> && std::convertible_to<AllocType1*, AllocType*>
-    Unique(Unique<T1, AllocType1>&& p_other)
-        : mem_id(p_other.mem_id), allocator(p_other.allocator) {
+    Unique(Unique<T1, AllocType1>&& p_other) : mem_id(p_other.mem_id), allocator(p_other.allocator) {
         p_other.mem_id = MEM_NULL;
     }
     template <typename T1, typename AllocType1>
@@ -71,12 +71,11 @@ public:
         p_other.mem_id = MEM_NULL;
         return *this;
     }
-    
-    Unique(AllocType* p_allocator, MemID p_mem_id)
-        : mem_id(p_mem_id), allocator(p_allocator) {}
 
-    Unique(MemID p_mem_id)
-        : Unique() {
+    Unique(AllocType* p_allocator, MemID p_mem_id) : mem_id(p_mem_id), allocator(p_allocator) {
+    }
+
+    Unique(MemID p_mem_id) : Unique() {
         if (p_mem_id != MEM_NULL) {
             throw std::runtime_error("Allocator not specified.");
         }
@@ -86,7 +85,8 @@ public:
      * @brief Create a unique instance.
      *
      * @tparam Args The arguments of the constructor.
-     * @param p_allocator The allocator that this instance is going to be allocated.
+     * @param p_allocator The allocator that this instance is going to be
+     * allocated.
      * @param p_args The arguments.
      * @return The unique instnace.
      */
@@ -186,7 +186,7 @@ private:
  * @param p_args The arguments.
  * @return The unique instnace.
  */
-template <typename T, typename AllocType = HeapAllocator,  typename... Args>
+template <typename T, typename AllocType = HeapAllocator, typename... Args>
 Unique<T> make_unique(AllocType* p_allocator, Args&&... p_args) {
     WBE_DEBUG_ASSERT(p_allocator != nullptr);
     MemID id = create_obj<T>(*p_allocator, std::forward<Args>(p_args)...);
@@ -194,14 +194,14 @@ Unique<T> make_unique(AllocType* p_allocator, Args&&... p_args) {
 }
 
 } // namespace WhiteBirdEngine
-//
+
 namespace std {
 /**
  * @brief Hash function for unique instance.
  *
  * @tparam T The type of the instance.
  * @param p_ref The reference to hash.
- * @return 
+ * @return
  */
 template <typename T, typename AllocType>
 struct hash<::WhiteBirdEngine::Unique<T, AllocType>> { // NOLINT
@@ -211,7 +211,6 @@ struct hash<::WhiteBirdEngine::Unique<T, AllocType>> { // NOLINT
         }
         return std::hash<AllocType*>{}(p_unique.allocator) ^ std::hash<::WhiteBirdEngine::MemID>{}(p_unique.control_block->mem_id);
     }
-
 };
 
 } // namespace std

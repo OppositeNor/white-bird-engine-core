@@ -36,7 +36,6 @@ public:
     CLAASTVisitor& operator=(const CLAASTVisitor&) = delete;
     CLAASTVisitor& operator=(CLAASTVisitor&&) = delete;
 
-
     /**
      * @brief Visit root node.
      *
@@ -57,7 +56,6 @@ public:
      * @param p_node The node to visit.
      */
     virtual void visit(class CLAASTNodeOperation* p_node) = 0;
-
 };
 
 /**
@@ -83,6 +81,7 @@ public:
     std::string get_string() const {
         return ss.str();
     }
+
 private:
     uint32_t indent_depth = 0;
     std::stringstream ss;
@@ -96,8 +95,7 @@ private:
  */
 class CLAASTVisitorAssembler : public CLAASTVisitor {
 public:
-    CLAASTVisitorAssembler()
-        : root({}) {
+    CLAASTVisitorAssembler() : root({}) {
     }
     virtual ~CLAASTVisitorAssembler() override = default;
     WBE_R6_NDCD_DELETE_COPY_MOVE(CLAASTVisitorAssembler)

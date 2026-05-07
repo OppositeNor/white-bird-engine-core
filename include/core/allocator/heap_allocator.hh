@@ -41,9 +41,9 @@ public:
 
     /**
      * @brief Allocate memory of a specific size.
-     * @note If IS_ALLOC_FIXED_SIZE is true for this allocator, allocating a size
-     * that is not the same as the specified size for the allocator will cause an
-     * error.
+     * @note If IS_ALLOC_FIXED_SIZE is true for this allocator, allocating a
+     * size that is not the same as the specified size for the allocator will
+     * cause an error.
      *
      * @param p_size The size to allocate.
      * @return The memory ID of the allocated resource.
@@ -120,7 +120,7 @@ public:
 template <typename T, typename... Args>
 inline MemID create_obj(HeapAllocator& p_allocator, Args&&... p_args) {
     MemID id = p_allocator.allocate(sizeof(T));
-    new(p_allocator.get(id)) T(std::forward<Args>(p_args)...);
+    new (p_allocator.get(id)) T(std::forward<Args>(p_args)...);
     return id;
 }
 
@@ -145,17 +145,19 @@ inline void destroy_obj(AllocType& p_allocator, MemID p_id) {
  *
  * @tparam T The type of the array element.
  * @tparam AllocType The type of the allocator.
- * @tparam Args The arguments types that will be passed to each element of the constructor.
+ * @tparam Args The arguments types that will be passed to each element of the
+ * constructor.
  * @param p_allocator The allocator to allocate the array.
  * @param p_num The size of the array.
- * @param p_args The arguments that will be passed to each element of the constructor.
+ * @param p_args The arguments that will be passed to each element of the
+ * constructor.
  * @return The array created.
  */
 template <typename T, typename AllocType, typename... Args>
 inline MemID create_array(AllocType& p_allocator, size_t p_num, Args&&... p_args) {
     T* begin = reinterpret_cast<T*>(p_allocator.allocate(sizeof(T) * p_num));
     for (size_t i = 0; i < p_num; ++i) {
-        new(begin + i) T(std::forward<Args>(p_args)...);
+        new (begin + i) T(std::forward<Args>(p_args)...);
     }
     return reinterpret_cast<MemID>(begin);
 }

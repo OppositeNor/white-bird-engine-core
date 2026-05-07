@@ -70,7 +70,6 @@ concept AllocatorTraitConcept = requires {
  */
 class IAllocator {
 public:
-
     WBE_R6_DEFAULT_VIRTUAL(IAllocator)
 
     /**
@@ -80,7 +79,6 @@ public:
      * @return The pointer of the resource.
      */
     virtual void* get(MemID p_id) const = 0;
-
 };
 
 } // namespace WhiteBirdEngine

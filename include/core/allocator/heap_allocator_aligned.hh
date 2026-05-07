@@ -14,8 +14,8 @@
 */
 #ifndef WBE_FILE_HEAP_ALLOCATOR_POOL_ALIGNED_HH
 #define WBE_FILE_HEAP_ALLOCATOR_POOL_ALIGNED_HH
-#include "core/allocator/i_allocator.hh"
 #include "core/allocator/heap_allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "utils/defs.hh"
 #include <cstddef>
 #include <sstream>
@@ -43,9 +43,9 @@ public:
 
     /**
      * @brief Allocate memory of a specific size.
-     * @note If IS_ALLOC_FIXED_SIZE is true for this allocator, allocating a size
-     * that is not the same as the specified size for the allocator will cause an
-     * error.
+     * @note If IS_ALLOC_FIXED_SIZE is true for this allocator, allocating a
+     * size that is not the same as the specified size for the allocator will
+     * cause an error.
      *
      * @param p_size The size to allocate.
      * @return The memory ID of the allocated resource.
@@ -56,9 +56,9 @@ public:
 
     /**
      * @brief Allocate memory of a specific size.
-     * @note If IS_ALLOC_FIXED_SIZE is true for this allocator, allocating a size
-     * that is not the same as the specified size for the allocator will cause an
-     * error.
+     * @note If IS_ALLOC_FIXED_SIZE is true for this allocator, allocating a
+     * size that is not the same as the specified size for the allocator will
+     * cause an error.
      *
      * @param p_size The size to allocate.
      * @param p_alignment Alignment.

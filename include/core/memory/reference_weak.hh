@@ -21,9 +21,9 @@
 #include "utils/defs.hh"
 #include <atomic>
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <cstddef>
 
 namespace WhiteBirdEngine {
 
@@ -32,8 +32,8 @@ class RefWeak {
 public:
     using ObjType = T;
 
-    RefWeak()
-        : control_block(nullptr) {}
+    RefWeak() : control_block(nullptr) {
+    }
     ~RefWeak() {
         deref();
     }
@@ -168,7 +168,8 @@ public:
     }
 
     /**
-     * @brief Is the reference NULL. Invalid reference would be recognized as NULL.
+     * @brief Is the reference NULL. Invalid reference would be recognized as
+     * NULL.
      *
      * @return True if the reference is NULL, false otherwise.
      */
@@ -192,7 +193,8 @@ private:
         }
         uint32_t weak_ref_count = control_block->weak_ref_counter.fetch_sub(1, std::memory_order_acq_rel);
         if (weak_ref_count == 1 && control_block->strong_ref_counter.load(std::memory_order_acquire) == 0) {
-            // If this is the last weak reference referencing this, and no strong reference is referencing this, destroy the control block.
+            // If this is the last weak reference referencing this, and no
+            // strong reference is referencing this, destroy the control block.
             destroy_obj<typename Ref<T>::ControlBlock>(*(control_block->allocator), control_block->control_block_mem_id);
         }
         control_block = nullptr;
@@ -207,7 +209,7 @@ namespace std {
  *
  * @tparam T The type of the reference.
  * @param p_ref The reference to hash.
- * @return 
+ * @return
  */
 template <typename T, typename AllocType>
 struct hash<::WhiteBirdEngine::RefWeak<T, AllocType>> {
@@ -215,9 +217,9 @@ struct hash<::WhiteBirdEngine::RefWeak<T, AllocType>> {
         if (p_ref.is_null()) {
             return WhiteBirdEngine::MEM_NULL;
         }
-        return std::hash<AllocType*>{}(p_ref.control_block->allocator) ^ std::hash<::WhiteBirdEngine::MemID>{}(p_ref.control_block->mem_id);
+        return std::hash<AllocType*>{}(p_ref.control_block->allocator) ^
+               std::hash<::WhiteBirdEngine::MemID>{}(p_ref.control_block->mem_id);
     }
-
 };
 } // namespace std
 

@@ -18,23 +18,24 @@
 #include "core/engine_core.hh"
 #include "core/profiling/profiling_manager.hh"
 #include "utils/utils.hh"
-#include <string>
 #include <cstdint>
+#include <string>
 #include <utility>
 namespace WhiteBirdEngine {
 
-#define WBE_START_PROFILE(CHANNEL, p_message) auto profiler_##__LINE__ = WhiteBirdEngine::Profiler(CHANNEL, p_message, std::string(__FILE__), __LINE__)
+#define WBE_START_PROFILE(CHANNEL, p_message)                                                                               \
+    auto profiler_##__LINE__ = WhiteBirdEngine::Profiler(CHANNEL, p_message, std::string(__FILE__), __LINE__)
 
 /**
  * @brief The profiler class.
- * This initiates the profiling right after it is constructed, and ends and push data to the manager
- * right after it is destructed.
+ * This initiates the profiling right after it is constructed, and ends and push
+ * data to the manager right after it is destructed.
  */
 class Profiler {
 public:
     using ProfileData = ProfilingManager::ProfileData;
     Profiler(ChannelID p_channel, const std::string& p_message, const std::string& p_file, uint32_t p_line) {
-        profile_data = { .channel = p_channel, .message = p_message, .file = p_file, .line = p_line };
+        profile_data = {.channel = p_channel, .message = p_message, .file = p_file, .line = p_line};
         profile_data.start_time = EngineCore::get_singleton()->global_clock->get_duration();
     }
 

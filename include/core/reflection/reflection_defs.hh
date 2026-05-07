@@ -20,7 +20,8 @@
 #ifdef WBE_REFLECTION_PARSER
 #define WBE_ATTR(...) __attribute__((annotate(#__VA_ARGS__)))
 #define WBE_META(...) WBE_ATTR(WBE, __VA_ARGS__)
-#define WBE_LABEL(label_name, ...) constexpr HashCode WBE_META(__VA_ARGS__) label_name = static_hash(WBE_EXPAND_STR(label_name));
+#define WBE_LABEL(label_name, ...)                                                                                          \
+    constexpr HashCode WBE_META(__VA_ARGS__) label_name = static_hash(WBE_EXPAND_STR(label_name));
 
 #else
 #define WBE_META(...)
@@ -37,7 +38,6 @@ namespace WhiteBirdEngine {
 template <typename T>
 class SerializableSD {
 public:
-
     using ObjType = T;
 
     /**
@@ -59,9 +59,8 @@ public:
      */
     template <typename ParserDataType>
     static void deserialize(const ParserDataType& p_data, ObjType& p_serializable) {
-         p_data.template get<ObjType>(p_serializable);
+        p_data.template get<ObjType>(p_serializable);
     }
-
 };
 
 } // namespace WhiteBirdEngine

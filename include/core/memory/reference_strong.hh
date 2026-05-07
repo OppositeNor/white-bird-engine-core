@@ -15,8 +15,8 @@
 #ifndef WBE_FILE_REFERENCE_STRONG_HH
 #define WBE_FILE_REFERENCE_STRONG_HH
 
-#include "core/allocator/i_allocator.hh"
 #include "core/allocator/heap_allocator.hh"
+#include "core/allocator/i_allocator.hh"
 #include "utils/defs.hh"
 #include <atomic>
 #include <concepts>
@@ -45,8 +45,8 @@ class Ref {
     friend struct ::std::hash<Ref<T, AllocType>>;
 
     struct ControlBlock;
-public:
 
+public:
     using ObjType = T;
 
     Ref() {
@@ -88,7 +88,8 @@ public:
             control_block = nullptr;
             return;
         }
-        throw std::runtime_error("Cannot directly asign an memory id to a reference unless it's MEM_NULL.");
+        throw std::runtime_error("Cannot directly asign an memory id to a "
+                                 "reference unless it's MEM_NULL.");
     }
 
     template <typename T1, typename AllocType1>
@@ -176,7 +177,8 @@ public:
     /**
      * @brief Get the resource pointer.
      *
-     * @return The pointer pointing to the resource. nullptr if mem_id is MEM_NULL.
+     * @return The pointer pointing to the resource. nullptr if mem_id is
+     * MEM_NULL.
      */
     T* get() {
         if (control_block == nullptr) {
@@ -189,7 +191,8 @@ public:
     /**
      * @brief Get the resource pointer.
      *
-     * @return The pointer pointing to the resource. nullptr if mem_id is MEM_NULL.
+     * @return The pointer pointing to the resource. nullptr if mem_id is
+     * MEM_NULL.
      */
     const T* get() const {
         if (control_block == nullptr) {
@@ -269,7 +272,8 @@ public:
 
     bool operator==(MemID p_mem_id) const {
         if (p_mem_id != MEM_NULL) {
-            throw std::runtime_error("Cannot compare a unique with a memory ID that is not MEM_NULL.");
+            throw std::runtime_error("Cannot compare a unique with a memory ID "
+                                     "that is not MEM_NULL.");
         }
         return is_null();
     }
@@ -294,15 +298,12 @@ public:
     }
 
 private:
-
-    Ref(ControlBlock* p_control_block)
-        : control_block(p_control_block) {
+    Ref(ControlBlock* p_control_block) : control_block(p_control_block) {
         ref();
     }
 
     struct ControlBlock {
-        ControlBlock(AllocType* p_alloc_type, MemID p_mem_id)
-            : mem_id(p_mem_id), allocator(p_alloc_type) {
+        ControlBlock(AllocType* p_alloc_type, MemID p_mem_id) : mem_id(p_mem_id), allocator(p_alloc_type) {
             weak_ref_counter.store(0, std::memory_order_release);
             strong_ref_counter.store(0, std::memory_order_release);
         }
@@ -318,7 +319,8 @@ private:
             return;
         }
         control_block->strong_ref_counter.fetch_add(1, std::memory_order_release);
-        // For all strong reference, create a hidden weak reference, since only weak reference could destruct control block.
+        // For all strong reference, create a hidden weak reference, since only
+        // weak reference could destruct control block.
         control_block->weak_ref_counter.fetch_add(1, std::memory_order_release);
     }
 
@@ -327,7 +329,8 @@ private:
             return;
         }
         if (control_block->strong_ref_counter.fetch_sub(1, std::memory_order_acq_rel) == 1) {
-            // If all the references of the control block is freed, destroy the object.
+            // If all the references of the control block is freed, destroy the
+            // object.
             destroy_obj<T>(*(control_block->allocator), control_block->mem_id);
         }
         // Dereference the hidden weak reference.
@@ -338,7 +341,8 @@ private:
     void weak_deref() const {
         uint32_t weak_ref_count = control_block->weak_ref_counter.fetch_sub(1, std::memory_order_acq_rel);
         if (weak_ref_count == 1 && control_block->strong_ref_counter.load(std::memory_order_acquire) == 0) {
-            // If this is the last weak reference referencing this, and no strong reference is referencing this, destroy the control block.
+            // If this is the last weak reference referencing this, and no
+            // strong reference is referencing this, destroy the control block.
             destroy_obj<typename Ref<T>::ControlBlock>(*(control_block->allocator), control_block->control_block_mem_id);
         }
         control_block = nullptr;
@@ -348,9 +352,7 @@ private:
 };
 
 template <typename T>
-concept ThisRefAsignable = requires(T* p_ins, Ref<T> p_ref) {
-    p_ins->set_ref_of_this(p_ref);
-};
+concept ThisRefAsignable = requires(T* p_ins, Ref<T> p_ref) { p_ins->set_ref_of_this(p_ref); };
 
 /**
  * @brief Make a reference with given constructor arguments.
@@ -382,7 +384,7 @@ namespace std {
  *
  * @tparam T The type of the reference.
  * @param p_ref The reference to hash.
- * @return 
+ * @return
  */
 template <typename T, typename AllocType>
 struct hash<::WhiteBirdEngine::Ref<T, AllocType>> { // NOLINT(cert-dcl58-cpp)
@@ -391,9 +393,9 @@ struct hash<::WhiteBirdEngine::Ref<T, AllocType>> { // NOLINT(cert-dcl58-cpp)
             return WhiteBirdEngine::MEM_NULL;
         }
         WBE_DEBUG_ASSERT(p_ref.control_block != nullptr);
-        return std::hash<AllocType*>{}(p_ref.control_block->allocator) ^ std::hash<::WhiteBirdEngine::MemID>{}(p_ref.control_block->mem_id);
+        return std::hash<AllocType*>{}(p_ref.control_block->allocator) ^
+               std::hash<::WhiteBirdEngine::MemID>{}(p_ref.control_block->mem_id);
     }
-
 };
 } // namespace std
 
