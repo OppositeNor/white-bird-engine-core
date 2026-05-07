@@ -1,5 +1,7 @@
 # White Bird Engine
 
+**注意：此仓库仅包括引擎的核心层，完整引擎正在开发中。**
+
 > 一个为节奏游戏开发而构建的免费/自由游戏引擎。
 >
 > 基于 [Apache License Version 2.0](https://github.com/OppositeNor/white-bird-engine/blob/main/LICENSE) 许可发布。

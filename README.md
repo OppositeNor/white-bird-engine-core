@@ -1,5 +1,7 @@
 # White Bird Engine
 
+**Note: This repo is only the core layer of the engine. The full engine is still under development.**
+
 > A free game engine built for rhythm game development.
 >
 > Licensed under [Apache License Version 2.0](https://github.com/OppositeNor/white-bird-engine/blob/main/LICENSE).
