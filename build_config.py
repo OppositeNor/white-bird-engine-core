@@ -32,6 +32,24 @@ target_info = {
         "build-shared" : True,
         "generate-tests" : True,
     },
+    "debug-ninja" : {
+        "c-compiler" : "clang",
+        "cpp-compiler" : "clang++",
+        "export-directory" : "debug",
+        "cmake-build-type" : "Debug",
+        "build-shared" : True,
+        "generator" : "Ninja",
+        "generate-tests" : True,
+    },
+    "release-ninja" : {
+        "c-compiler" : "clang",
+        "cpp-compiler" : "clang++",
+        "export-directory" : "release",
+        "cmake-build-type" : "Release",
+        "build-shared" : True,
+        "generator" : "Ninja",
+        "generate-tests" : True,
+    },
     "deploy" : {
         "c-compiler" : "clang",
         "cpp-compiler" : "clang++",
@@ -50,6 +68,23 @@ target_info = {
         "generate-tests" : True,
     },
     "release-gcc" : {
+        "c-compiler" : "gcc",
+        "cpp-compiler" : "g++",
+        "export-directory" : "release-gcc",
+        "cmake-build-type" : "Release",
+        "build-shared" : True,
+        "generate-tests" : True,
+    },
+    "debug-gcc-ninja" : {
+        "c-compiler" : "gcc",
+        "cpp-compiler" : "g++",
+        "export-directory" : "debug-gcc",
+        "cmake-build-type" : "Debug",
+        "build-shared" : True,
+        "generator" : "Ninja",
+        "generate-tests" : True,
+    },
+    "release-gcc-ninja" : {
         "c-compiler" : "gcc",
         "cpp-compiler" : "g++",
         "export-directory" : "release-gcc",
@@ -100,6 +135,9 @@ gen_info = {
     "serializables" : [
         "WBE_SERIALIZABLE",
         "WBE_CONFIG_OPTION",
+    ],
+    "cla_configurations" : [
+        "WBE_CLA_CONFIGURATION",
     ],
 }
 

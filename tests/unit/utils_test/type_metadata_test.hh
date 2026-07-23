@@ -16,6 +16,8 @@
 #define WBE_FILE_TYPE_METADATA_TEST_HH
 #include "utils/defs.hh"
 #include "utils/utils.hh"
+#include <concepts>
+#include <cstdint>
 #include <gtest/gtest.h>
 
 struct TypeA {};
@@ -24,22 +26,22 @@ namespace WhiteBirdEngine {
 struct TypeB {};
 WBE_TYPE_METADATA(TypeA);
 WBE_TYPE_METADATA(TypeB);
-}
+} // namespace WhiteBirdEngine
 
 namespace WBE = WhiteBirdEngine;
 
 TEST(WBETypeMetadataTest, Hashing) {
-    constexpr uint32_t hash_hello = WBE::static_hash("Hello!");
-    constexpr uint32_t hash_hello2 = WBE::static_hash("Hello!");
-    constexpr uint32_t hash_goodbye = WBE::static_hash("Goodbye!");
-    ASSERT_EQ(hash_hello, hash_hello2);
-    ASSERT_NE(hash_hello, hash_goodbye);
+    constexpr uint32_t HASH_HELLO = WBE::static_hash("Hello!");
+    constexpr uint32_t HASH_HELLO2 = WBE::static_hash("Hello!");
+    constexpr uint32_t HASH_GOODBYE = WBE::static_hash("Goodbye!");
+    ASSERT_EQ(HASH_HELLO, HASH_HELLO2);
+    ASSERT_NE(HASH_HELLO, HASH_GOODBYE);
 }
 
 TEST(WBETypeMetadataTest, Metadata) {
     ASSERT_NE(WBE_TYPE_TO_ID(TypeA), WBE_TYPE_TO_ID(WBE::TypeB));
-    ASSERT_TRUE((std::is_same_v<WBE_TYPE_FROM_ID(WBE::TypeIDTrait<TypeA>::TYPE_ID), TypeA>));
-    ASSERT_TRUE((std::is_same_v<WBE_TYPE_FROM_ID(WBE::TypeIDTrait<WBE::TypeB>::TYPE_ID), WBE::TypeB>));
+    ASSERT_TRUE((std::same_as<WBE_TYPE_FROM_ID(WBE::TypeIDTrait<TypeA>::TYPE_ID), TypeA>));
+    ASSERT_TRUE((std::same_as<WBE_TYPE_FROM_ID(WBE::TypeIDTrait<WBE::TypeB>::TYPE_ID), WBE::TypeB>));
     ASSERT_EQ(WBE_TYPE_ID_NAME(WBE_TYPE_TO_ID(TypeA)), std::string("TypeA"));
 }
 

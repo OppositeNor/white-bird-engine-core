@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
+#include <cstdint>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -23,6 +24,11 @@
 
 namespace WhiteBirdEngine {
 FileSystem::FileSystem() : FileSystem(get_executable_dir()) {
+    singleton = this;
+}
+
+FileSystem::~FileSystem() {
+    singleton = nullptr;
 }
 
 FileSystem::FileSystem(const Directory& p_root_dir) {
@@ -30,7 +36,7 @@ FileSystem::FileSystem(const Directory& p_root_dir) {
     resource_directory = root_directory.combine(Directory({"res"}));
 }
 
-Directory FileSystem::parse_directory(const std::string& p_str) {
+Directory FileSystem::parse_directory(std::string_view p_str) {
     auto splitted = split_string(p_str, "/\\");
     if (splitted.size() == 0) {
         return Directory();
@@ -68,25 +74,22 @@ std::string FileSystem::dir_to_string(const Directory& p_directory) {
     return ss.str();
 }
 
-size_t get_last_splitter_pos(const std::string& p_path) {
+size_t get_last_splitter_pos(std::string_view p_path) {
     size_t last_slash = p_path.find_last_of('/');
     size_t last_bslash = p_path.find_last_of('\\');
     if (last_slash < last_bslash) {
         if (last_bslash == std::string::npos) {
             return last_slash;
-        } else {
-            return last_bslash;
         }
-    } else {
-        if (last_slash == std::string::npos) {
-            return last_bslash;
-        } else {
-            return last_slash;
-        }
+        return last_bslash;
     }
+    if (last_slash == std::string::npos) {
+        return last_bslash;
+    }
+    return last_slash;
 }
 
-std::string FileSystem::get_file_name(const std::string& p_path) {
+std::string FileSystem::get_file_name(std::string_view p_path) {
     // TODO: Test
     size_t target = get_last_splitter_pos(p_path);
     if (target == std::string::npos) {
@@ -95,7 +98,7 @@ std::string FileSystem::get_file_name(const std::string& p_path) {
     return p_path.substr(target);
 }
 
-Directory FileSystem::get_file_dir(const std::string& p_path) {
+Directory FileSystem::get_file_dir(std::string_view p_path) {
     // TODO: Test
     auto last_slash = get_last_splitter_pos(p_path);
     if (last_slash == std::string::npos) {
@@ -111,17 +114,17 @@ std::string FileSystem::path_to_string(const Path& p_path) {
 
 std::string FileSystem::get_ext(const Path& p_path) {
     // TODO: Test
-    auto& file_name = p_path.get_file_name();
+    const auto& file_name = p_path.get_file_name();
     auto ext_result = file_name.substr(file_name.find_last_of('.'));
     std::for_each(ext_result.begin(), ext_result.end(), [](char& p_c) {
-        p_c = std::tolower(p_c);
+        p_c = static_cast<char>(std::tolower(p_c));
     });
     return ext_result;
 }
 
 Directory FileSystem::get_executable_dir() {
-    Buffer<1024> buf;
-    unsigned long len = GetModuleFileName(NULL, buf.buffer, buf.BUFFER_SIZE);
+    Buffer<1024> buf{};
+    uint64_t len = GetModuleFileName(NULL, buf.buffer, decltype(buf)::BUFFER_SIZE);
     if (len < 0) {
         throw std::runtime_error("Failed to get the executable path.");
     }

@@ -16,23 +16,22 @@
 #include "platform/file_system/directory.hh"
 #include "platform/file_system/path.hh"
 #include "utils/utils.hh"
-#include <cstddef>
 #include <filesystem>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <system_error>
 #include <vector>
 
-#if defined(_WIN32)
-#include <windows.h>
-#elif defined(__APPLE__)
-#include <mach-o/dyld.h>
-#else
 #include <unistd.h>
-#endif
 
 namespace WhiteBirdEngine {
-
 FileSystem::FileSystem() : FileSystem(get_executable_dir()) {
+    singleton = this;
+}
+
+FileSystem::~FileSystem() {
+    singleton = nullptr;
 }
 
 FileSystem::FileSystem(const Directory& p_root_dir) {
@@ -41,7 +40,7 @@ FileSystem::FileSystem(const Directory& p_root_dir) {
     config_directory = resource_directory.combine(Directory({"config"}));
 }
 
-Directory FileSystem::parse_directory(const std::string& p_str) {
+Directory FileSystem::parse_directory(std::string_view p_str) {
     auto splitted = split_string(p_str, '/');
     if (splitted.empty()) {
         return Directory();
@@ -67,11 +66,11 @@ std::string FileSystem::dir_to_string(const Directory& p_directory) {
     return static_cast<std::string>(p_directory);
 }
 
-std::string FileSystem::get_file_name(const std::string& p_path) {
+std::string FileSystem::get_file_name(std::string_view p_path) {
     return std::filesystem::path(p_path).filename().generic_string();
 }
 
-Directory FileSystem::get_file_dir(const std::string& p_path) {
+Directory FileSystem::get_file_dir(std::string_view p_path) {
     auto last_slash = p_path.find_last_of('/');
     if (last_slash == std::string::npos) {
         return Directory();
@@ -88,34 +87,12 @@ std::string FileSystem::get_ext(const Path& p_path) {
 }
 
 Directory FileSystem::get_executable_dir() {
-#if defined(_WIN32)
-    char buffer[1024];
-    unsigned long len = ::GetModuleFileNameA(nullptr, buffer, sizeof(buffer));
-    if (len == 0) {
-        throw std::runtime_error("Failed to get the executable path.");
-    }
-    if (len >= sizeof(buffer)) {
-        throw std::runtime_error("Buffer overflow for executable path finding.");
-    }
-    buffer[len] = '\0';
-    std::string exe_path(buffer);
-    std::replace(exe_path.begin(), exe_path.end(), '\\', '/');
-    return get_file_dir(exe_path);
-#elif defined(__APPLE__)
-    char buffer[1024];
-    uint32_t size = sizeof(buffer);
-    if (_NSGetExecutablePath(buffer, &size) != 0) {
-        throw std::runtime_error("Buffer overflow for executable path finding.");
-    }
-    return get_file_dir(std::filesystem::canonical(buffer).generic_string());
-#else
     std::error_code ec;
     auto exe_path = std::filesystem::read_symlink("/proc/self/exe", ec);
     if (ec) {
         throw std::runtime_error("Failed to get the executable path.");
     }
     return get_file_dir(exe_path.generic_string());
-#endif
 }
 
 } // namespace WhiteBirdEngine

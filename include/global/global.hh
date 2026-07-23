@@ -25,14 +25,14 @@ namespace WhiteBirdEngine {
 /**
  * @class Global
  * @brief Global class. Stores all the global objects.
- * Terminate and then reinitialize it should result in restarting the game/engine.
+ * Terminate and then reinitialize it should result in restarting the
+ * game/engine.
  */
 class Global final : public ISingleton<Global> {
 public:
     Global() = delete;
     virtual ~Global() override;
     WBE_R6_NDCD_DELETE_COPY_MOVE(Global)
-
 
     /**
      * @brief Constructor.
@@ -70,6 +70,5 @@ private:
 };
 
 } // namespace WhiteBirdEngine
-
 
 #endif

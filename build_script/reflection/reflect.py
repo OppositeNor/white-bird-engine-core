@@ -14,8 +14,11 @@
 import json
 import os
 import importlib.util
-from build_script.reflection.code_gen import WBECodeGenerator, WBEGenFileInfo
+from typing import Any, Callable
+from build_script.reflection.code_gen import WBECodeGenerator
 from build_script.reflection.metadata_types import WBEMetadata
+from build_script.reflection.gen_file_info import WBEGenFileInfo
+from build_script.reflection.parameter_resolver import WBEDictParameterSource
 from build_config import gen_info
 from build_script.utils import hash_str
 import build_setup
@@ -59,7 +62,7 @@ class WBEReflector:
             spec.loader.exec_module(module_config)
             module_config.register(self)
 
-    def register_metadata(self, metadata) -> None:
+    def register_metadata(self, metadata: WBEMetadata) -> None:
         self.metadata = metadata
 
     def dump(self) -> None:
@@ -69,7 +72,19 @@ class WBEReflector:
             # Output metadata for debug purpose.
             self._write_to_file(build_setup.metadata_path, json.dumps(self.metadata.model_dump(), indent=4))
         # Generate code
-        generator = WBECodeGenerator(gen_info | {"metadata" : self.metadata}, self._gen_file_infos)
+        builtin_source = WBEDictParameterSource({
+            "build_target": build_setup.args.target,
+            "build_dir": build_setup.build_dir,
+            "binary_dir": build_setup.binary_dir,
+            "root_dir": build_setup.root_dir,
+            "include_dir": build_setup.include_dir,
+            "source_dir": build_setup.source_dir,
+        })
+        generator = WBECodeGenerator(
+            gen_info | {"metadata" : self.metadata},
+            self._gen_file_infos,
+            extra_sources=[builtin_source],
+        )
         generator.generate()
 
     def checks(self) -> None:
@@ -82,16 +97,17 @@ class WBEReflector:
         with open(path, "w+") as channel_file:
             channel_file.write(str_content)
 
-    def _check_redefinition(self, objs : list) -> None:
-        seen = set()
+    def _check_redefinition(self, objs: list[Any]) -> None:
+        seen: set[str] = set()
         for check in objs:
             if check.name in seen:
                 raise RuntimeError(f"\"{check.name}\" is redefined.")
             seen.add(check.name)
 
-    def _check_hashing_collision(self, dict_name : str, objs : list, hash_function) -> None:
-        hash_val_set = set()
-        dict_rev = dict()
+    def _check_hashing_collision(self, dict_name: str, objs: list[Any],
+                                 hash_function: Callable[[Any], int]) -> None:
+        hash_val_set: set[int] = set()
+        dict_rev: dict[int, Any] = dict()
         for check in objs:
             hash_code = hash_function(check)
             if hash_code in hash_val_set:
@@ -99,6 +115,3 @@ class WBEReflector:
                     f"and \"{dict_rev[hash_code]}\" are identical: {hash_code}")
             dict_rev[hash_code] = check
             hash_val_set.add(hash_code)
-
-
-

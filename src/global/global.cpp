@@ -21,12 +21,12 @@ namespace WhiteBirdEngine {
 
 Global::Global(int p_argc, char* p_argv[]) {
     singleton = this;
-    engine_core = new EngineCore(p_argc, p_argv);
+    engine_core = new EngineCore(static_cast<uint32_t>(p_argc), p_argv);
 }
 
 Global::Global(int p_argc, char* p_argv[], const Directory& p_root_dir) {
     singleton = this;
-    engine_core = new EngineCore(p_argc, p_argv, p_root_dir);
+    engine_core = new EngineCore(static_cast<uint32_t>(p_argc), p_argv, p_root_dir);
 }
 
 Global::~Global() {

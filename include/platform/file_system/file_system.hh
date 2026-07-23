@@ -20,6 +20,7 @@
 #include "utils/defs.hh"
 #include "utils/interface/i_singleton.hh"
 #include <string>
+#include <string_view>
 namespace WhiteBirdEngine {
 
 /**
@@ -30,7 +31,7 @@ namespace WhiteBirdEngine {
 class FileSystem final : public ISingleton<FileSystem> {
 public:
     FileSystem();
-    ~FileSystem() = default;
+    ~FileSystem();
     WBE_R6_NDCD_DELETE_COPY_MOVE(FileSystem)
 
     /**
@@ -41,12 +42,21 @@ public:
     FileSystem(const Directory& p_root_dir);
 
     /**
+     * @brief Get the singleton.
+     *
+     * @return The singleton.
+     */
+    static FileSystem* get_singleton() {
+        return singleton;
+    }
+
+    /**
      * @brief Parse a directory from a string.
      *
      * @param p_str The string to parse directory from.
      * @return The directory parsed.
      */
-    static Directory parse_directory(const std::string& p_str);
+    static Directory parse_directory(std::string_view p_str);
 
     /**
      * @brief Get the directory of the executable file.
@@ -87,7 +97,7 @@ public:
      *
      * @param p_path The path to the file.
      */
-    static std::string get_file_name(const std::string& p_path);
+    static std::string get_file_name(std::string_view p_path);
 
     /**
      * @brief Get the directory of the file.
@@ -95,7 +105,7 @@ public:
      * @param p_path The path to the file.
      * @return The directory of the file.
      */
-    static Directory get_file_dir(const std::string& p_path);
+    static Directory get_file_dir(std::string_view p_path);
 
     /**
      * @brief Get the path from a string.
@@ -103,7 +113,7 @@ public:
      * @param p_path The string path.
      * @return The path instance.
      */
-    Path get_file_path(const std::string& p_path) const {
+    Path get_file_path(std::string_view p_path) const {
         return Path(get_file_dir(p_path), get_file_name(p_path));
     }
 
@@ -132,6 +142,7 @@ private:
     Directory root_directory;
     Directory resource_directory;
     Directory config_directory;
+    inline static FileSystem* singleton = nullptr;
 };
 
 /**

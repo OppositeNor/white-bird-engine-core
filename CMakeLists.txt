@@ -13,7 +13,7 @@
 # limitations under the License.
 cmake_minimum_required(VERSION 3.20)
 
-project(WhiteBirdEngine)
+project(WhiteBirdEngine LANGUAGES C CXX)
 
 # Use C++ 23 standard
 set(CMAKE_CXX_STANDARD 23)
@@ -26,8 +26,7 @@ option(WBE_MAKE_TEST "Export test for White Bird Engine" ON)
 set(WBE_BINARY_DIR ${CMAKE_BINARY_DIR}/bin CACHE STRING "The binary output directory.")
 option(WBE_BUILD_SHARED "Should build shared library" ON)
 
-
-# Define output paths
+# Output pathes
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${WBE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${WBE_BINARY_DIR}/libs)
 
@@ -96,9 +95,15 @@ if (WBE_MAKE_TEST)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWBE_BUILD_TEST=OFF")
 endif()
 
+# Use default aligned gentypes in glm
+add_definitions(-DGLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
+
 # Set include directories
 set(include_dirs 
-    ${PROJECT_SOURCE_DIR}/include
+    ${Vulkan_INCLUDE_DIR}
+    ${WBE_INCLUDE_DIR}
+    ${WBE_PER_TARGET_INCLUDE_DIR}
+    ${PROJECT_SOURCE_DIR}/dependencies/entt/single_include
     ${PROJECT_SOURCE_DIR}/dependencies/glm
     ${PROJECT_SOURCE_DIR}/dependencies/json/single_include
     ${PROJECT_SOURCE_DIR}/dependencies/yaml-cpp/include
@@ -120,6 +125,7 @@ include_directories(
 set(libs ${libs}
     yaml-cpp::yaml-cpp
     boost_thread
+    boost_program_options
 )
 
 # Add engine source
@@ -147,5 +153,3 @@ if (WBE_MAKE_TEST)
     # Export tests
     add_subdirectory(tests)
 endif()
-
-

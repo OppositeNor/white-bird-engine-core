@@ -8,10 +8,10 @@ Layers, from upper to lower. Upper layers may depend on lower layers; the revers
 
 | # | Layer      | Role                                                                |
 |---|------------|---------------------------------------------------------------------|
-| 1 | `global`   | Engine-wide primitives, allocators, STL-allocator wrappers.         |
+| 1 | `global`   | Engine-wide primitives         |
 | 2 | `function` | High-level engine subsystems (e.g. ECS, gameplay glue).             |
 | 3 | `resource` | Resource units, asset loading, resource registry.                   |
-| 4 | `core`     | Memory model (`Ref`, `Unique`, ...), jobs, math/util building blocks. |
+| 4 | `core`     | Allocators, STL-allocator wrappers, Memory model (`Ref`, `Unique`, ...), jobs, math/util building blocks. |
 | 5 | `platform` | OS / windowing / file system / renderer backends.                   |
 
 Rules:
@@ -64,7 +64,6 @@ Per-directory `CMakeLists.txt` use `file(GLOB *.cpp)`; just drop new files in.
 - `templates/` — Jinja templates consumed by `build_script/reflection/`.
 - `res/`, `test_env_res/` — runtime assets.
 - `dependencies/` — vendored third-party (do not modify).
-- `docs/` — design notes.
 - `todos/` — per-layer todo lists.
 
 Header / source naming: `snake_case.hh` / `snake_case.cpp`. Header guards: `WBE_FILE_<UPPER_SNAKE>_HH`. One primary class per file; file name matches the class in `snake_case`.
@@ -89,7 +88,7 @@ Ref<Foo> r = make_ref<Foo>(allocator, args...);
 Unique<Foo> u = make_unique<Foo>(allocator, args...);
 ```
 
-Containers: use `Vector<T>` etc. from `global/stl_allocator.hh` rather than raw `std::vector`. Custom allocator types follow standard `allocator_traits` member names: `rebind::other`, `propagate_on_container_copy_assignment`, `propagate_on_container_move_assignment`, `propagate_on_container_swap`.
+Containers: use `Vector<T>` etc. from `core/allocator/stl_allocator.hh` rather than raw `std::vector`. Custom allocator types follow standard `allocator_traits` member names: `rebind::other`, `propagate_on_container_copy_assignment`, `propagate_on_container_move_assignment`, `propagate_on_container_swap`.
 
 ## Naming
 
@@ -97,7 +96,7 @@ Containers: use `Vector<T>` etc. from `global/stl_allocator.hh` rather than raw 
 - Function parameters: prefix `p_` (e.g. `p_allocator`, `p_buffer_size`). Local variables: no prefix. Member fields: no prefix.
 - **No abbreviations** unless they are universally well-known. Examples:
   - Forbidden: `ci` (use `create_info`), `mgr` (use `manager`), `tex` (use `texture`), `cfg` (use `config` only if widely understood, else `configuration`).
-  - Allowed well-known: `MPSC` (multiple producers, single consumer), `SPSC` (single producer, single consumer), `i`/`j`/`k` as for-loop indices, `id`, `uuid`, `gpu`, `cpu`, `os`, `vk` (Vulkan).
+  - Allowed well-known: `MPSC` (multiple producers, single consumer), `SPSC` (single producer, single consumer), `i`/`j`/`k` as for-loop indices, `id`, `uuid`, `gpu`, `cpu`, `os`, `vk` (Vulkan), `rma` (roughness-metallic-ao texture channel pack).
 - If a name is too long, each word may be shortened to its first **≥4** letters. Examples: `initiate` → `init`, `information` → `info`, `allocator` → `alloc`; use shortening only when it remains unambiguous (`init`, `info`, `config`, `descr`).
 - Preserve domain spellings already used in the codebase (e.g. test labels) even if unusual.
 
@@ -114,8 +113,32 @@ Containers: use `Vector<T>` etc. from `global/stl_allocator.hh` rather than raw 
 - Prefer the engine's file system wrappers `Directory` / `Path` (in `platform/file_system/`) over raw `std::filesystem`. They are header-only thin wrappers around `std::filesystem` — use them in engine code; drop down to `std::filesystem` only inside their implementation or when an API genuinely requires it. Note: `Directory::get_dir_names()` returns by value, capture with `auto`.
 - For unbounded counting semaphores, use `std::counting_semaphore<>` (max = `PTRDIFF_MAX`); do not pick a small `LeastMaxValue` unless you can prove the bound.
 
+## API Design
+
+- **Prefer exposing classes and interfaces over free-function wrappers.** When a feature has internal state, a constructable context, or a small set of related operations, declare the class in the public header and expose its members. Do not hide it behind a file-local impl class wrapped by free functions in the .cpp. Internal helpers, anonymous-namespace utilities, and detail types stay in the `.cpp`.
+- **Name derived implementations with the interface (or its abbreviation) as a prefix.** For example, `RenderObject` → `ROImage`, `ROGraphicsPipelineVK`; `Renderer` → `RendererVK`; `RenderTask` → `RTRunGraphicsPipelineVK`. Pick a short, consistent abbreviation per interface and use it for all derived types.
+
+## Documentation
+
+- C++ (`.hh` / `.cpp`) and Slang (`.slang`) source files use **Doxygen** comments (`/** ... */`).
+- Documentation is **required** for:
+  - Publicly visible `struct`s and `class`es, and their `public` / `protected` fields.
+  - `public` and `protected` functions / methods (including free functions exposed in headers).
+- Documentation is **not required** for:
+  - `private` members.
+  - Derived overrides of `virtual` functions — document the virtual at its first declaration in the base class only. Overrides inherit the contract; add a doc comment only when behavior diverges in a way callers must know.
+  - File-local / anonymous-namespace helpers in `.cpp` files.
+- Keep comments terse and informative: describe contract (params, returns, ownership, threading, error/throw behavior) rather than restating the signature.
+
 ## Reflection / Codegen
 
 - All C++ header code are scanned by `build_script/reflection/metaparser.py`.
 - Generated artifacts live in `*.gen.*` files; regenerated automatically each build. Do not edit by hand.
 - Templates for codegen live in `templates/*.jinja`.
+
+## Python Scripts
+
+- All function parameters and return values must have type annotations. Use `-> None` explicitly for procedures.
+- Prefer concrete generics (`list[str]`, `dict[str, Any]`) over bare `list` / `dict`. Use `from typing import Any, Callable` etc. when needed.
+- Annotate non-trivial local variables whose type cannot be obviously inferred (e.g. empty containers: `result: list[str] = []`).
+- Use PEP 604 unions (`X | None`) rather than `Optional[X]`.
