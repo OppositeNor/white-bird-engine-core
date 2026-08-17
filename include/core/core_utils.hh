@@ -15,15 +15,23 @@
 #ifndef WBE_FILE_CORE_UTILS_HH
 #define WBE_FILE_CORE_UTILS_HH
 
-#include "core/allocator/heap_allocator_aligned_pool_impl_list.hh"
-#include "core/allocator/heap_allocator_atomic_mutex_aligned_pool_impl_list.hh"
+#include "core/allocator/heap_allocator_atomic_arena_aligned_pool_impl_list.hh"
 #include "core/allocator/i_allocator.hh"
 #include "core/memory/reference_strong.hh"
 #include "core/memory/reference_weak.hh"
 #include "utils/defs.hh"
 #include <format>
+#include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string_view>
+
+// Get a required optional value.
+#define WBE_REQUIRED(optional_value) WhiteBirdEngine::required(#optional_value, (optional_value))
+
+// Requires a pointer or reference to be non-null.
+#define WBE_REQUIRES_VALID(optional_value) WhiteBirdEngine::requires_valid(#optional_value, (optional_value))
+
 namespace WhiteBirdEngine {
 
 /**
@@ -58,6 +66,72 @@ protected:
     RefWeak<T> this_ref;
 };
 
+/**
+ * @brief A better name for the required field.
+ * We're using std::optional's valid check to check if a required field has passed in. However, "optional"
+ * is definitely not a good word for fields that are "required". So we're making an alias here.
+ *
+ * @tparam T The type of the required value.
+ */
+template <typename T>
+using Required = std::optional<T>; // What's optional is actually required...
+
+template <typename T>
+inline T& required(std::string_view p_value_name, std::optional<T>& p_optional_value) {
+    if (!p_optional_value.has_value()) {
+        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
+    }
+    return p_optional_value.value();
+}
+
+template <typename T>
+inline const T& required(std::string_view p_value_name, const std::optional<T>& p_optional_value) {
+    if (!p_optional_value.has_value()) {
+        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
+    }
+    return p_optional_value.value();
+}
+
+template <typename T>
+inline std::optional<T>& requires_valid(std::string_view p_value_name, std::optional<T>& p_optional_value) {
+    if (!p_optional_value.has_value()) {
+        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
+    }
+    return p_optional_value;
+}
+
+template <typename T>
+inline std::optional<T> requires_valid(std::string_view p_value_name, std::optional<T>&& p_optional_value) {
+    if (!p_optional_value.has_value()) {
+        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
+    }
+    return p_optional_value;
+}
+
+template <typename T>
+inline T* requires_valid(std::string_view p_value_name, T* p_optional_value) {
+    if (p_optional_value == nullptr) {
+        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
+    }
+    return p_optional_value;
+}
+
+template <typename T>
+inline std::shared_ptr<T> requires_valid(std::string_view p_value_name, std::shared_ptr<T> p_optional_value) {
+    if (p_optional_value == nullptr) {
+        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
+    }
+    return p_optional_value;
+}
+
+template <typename T>
+inline std::unique_ptr<T> requires_valid(std::string_view p_value_name, std::unique_ptr<T> p_optional_value) {
+    if (p_optional_value == nullptr) {
+        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
+    }
+    return p_optional_value;
+}
+
 template <typename T>
 T& required(std::string_view p_name, Ref<T> p_ref) {
     if (p_ref == MEM_NULL) {
@@ -82,8 +156,7 @@ RefWeak<T> requires_valid(std::string_view p_name, RefWeak<T> p_ref) {
     return p_ref;
 }
 
-using HeapAllocatorDefault = HeapAllocatorAlignedPoolImplicitList;
-using HeapAllocatorAtomicDefault = HeapAllocatorAtomicMutexAlignedPoolImplicitList;
+using HeapAllocatorDefault = HeapAllocatorAtomicArenaAlignedPoolImplicitList;
 
 } // namespace WhiteBirdEngine
 

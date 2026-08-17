@@ -16,9 +16,7 @@
 #define WBE_FILE_GLOBAL_HH
 
 #include "core/engine_core.hh"
-#include "core/memory/unique.hh"
 #include "platform/file_system/directory.hh"
-#include "utils/defs.hh"
 #include "utils/interface/i_singleton.hh"
 
 namespace WhiteBirdEngine {
@@ -32,7 +30,10 @@ class Global final : public ISingleton<Global> {
 public:
     Global() = delete;
     virtual ~Global() override;
-    WBE_R6_NDCD_DELETE_COPY_MOVE(Global)
+    Global(const Global&) = delete;
+    Global(Global&&) noexcept = delete;
+    Global& operator=(const Global&) = delete;
+    Global& operator=(Global&&) noexcept = delete;
 
     /**
      * @brief Constructor.

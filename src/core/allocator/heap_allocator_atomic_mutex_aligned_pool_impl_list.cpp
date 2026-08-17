@@ -1,3 +1,17 @@
+/* Copyright 2025 OppositeNor
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 #include "core/allocator/heap_allocator_atomic_mutex_aligned_pool_impl_list.hh"
 #include "core/allocator/i_allocator.hh"
 #include "core/logging/log.hh"
@@ -14,6 +28,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #define WBE_HAAAPMIL_GET_HEADER_SIZE(p_header) ((p_header) & TOTAL_SIZE_MASK)
 #define WBE_HAAAPMIL_GET_CHUNK_SIZE(p_chunk) WBE_HAAAPMIL_GET_HEADER_SIZE(*reinterpret_cast<Header*>(p_chunk))
@@ -41,15 +56,18 @@
 
 namespace WhiteBirdEngine {
 
-HeapAllocatorAtomicMutexAlignedPoolImplicitList::HeapAllocatorAtomicMutexAlignedPoolImplicitList(size_t p_size) : size(p_size) {
+HeapAllocatorAtomicMutexAlignedPoolImplicitList::HeapAllocatorAtomicMutexAlignedPoolImplicitList(size_t p_size)
+    : HeapAllocatorAtomicMutexAlignedPoolImplicitList(MemoryChunk(p_size, HEADER_SIZE), 0, p_size) {
+}
+
+HeapAllocatorAtomicMutexAlignedPoolImplicitList::HeapAllocatorAtomicMutexAlignedPoolImplicitList(
+    MemoryChunk p_memory_chunk, size_t p_start_offset, size_t p_size)
+    : memory_chunk(std::move(p_memory_chunk)), size(p_size) {
     if (p_size > TOTAL_SIZE_MASK) {
         throw std::runtime_error("Failed to create pool: size: " + std::to_string(p_size) +
                                  " exceeds maximum: " + std::to_string(TOTAL_SIZE_MASK) + ".");
     }
-    mem_chunk = static_cast<char*>(aligned_alloc(HEADER_SIZE, p_size));
-    if (mem_chunk == nullptr) {
-        throw std::runtime_error("Failed to create pool: malloc failed.");
-    }
+    mem_chunk = memory_chunk.get_occupied_start(p_start_offset, p_size);
     memset(mem_chunk, 0, p_size);
     WBE_HAAAPMIL_SET_CHUNK_HEADER(mem_chunk, HeaderType::IDLE, size);
     possible_valid = mem_chunk;
@@ -59,11 +77,24 @@ HeapAllocatorAtomicMutexAlignedPoolImplicitList::~HeapAllocatorAtomicMutexAligne
     if (!is_empty()) {
         stdout_log(WBE_CHANNEL_GLOBAL)->warning("Non-empty allocator destructed. Allocator status: " + static_cast<std::string>(*this));
     }
-    free(mem_chunk); // NOLINT
     mem_chunk = nullptr;
 }
 
 MemID HeapAllocatorAtomicMutexAlignedPoolImplicitList::allocate(size_t p_size, size_t p_alignment) {
+    MemID result = try_allocate(p_size, p_alignment);
+    if (result != MEM_NULL || p_size == 0) {
+        return result;
+    }
+    std::string err_msg = "Failed to allocate memory: not enough space for memory pool.\n"
+                          "Trying to allocate: " +
+                          std::to_string(get_align_size(p_size, HEADER_SIZE) + HEADER_SIZE) +
+                          " bytes.\n"
+                          "Pool status: " +
+                          static_cast<std::string>(*this);
+    throw std::runtime_error(err_msg);
+}
+
+MemID HeapAllocatorAtomicMutexAlignedPoolImplicitList::try_allocate(size_t p_size, size_t p_alignment) {
     WBE_DEBUG_ASSERT(!(mutex.is_unique_locked_by_current_thread()));
     if (p_alignment == 0) {
         throw std::runtime_error("Allocation alignment must not be 0.");
@@ -80,19 +111,8 @@ MemID HeapAllocatorAtomicMutexAlignedPoolImplicitList::allocate(size_t p_size, s
     MemID result = find_valid_chunk<false>(aligned_size, p_alignment);
     if (result == MEM_NULL) {
         result = find_valid_chunk<true>(aligned_size, p_alignment);
-        if (result != MEM_NULL) {
-            return result;
-        }
-    } else {
-        return result;
     }
-    std::string err_msg = "Failed to allocate memory: not enough space for memory pool.\n"
-                          "Trying to allocate: " +
-                          std::to_string(aligned_size) +
-                          " bytes.\n"
-                          "Pool status: " +
-                          unguarded_to_string();
-    throw std::runtime_error(err_msg);
+    return result;
 }
 
 template <bool CoalesceEnabled>

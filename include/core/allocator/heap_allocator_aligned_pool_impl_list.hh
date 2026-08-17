@@ -17,6 +17,7 @@
 
 #include "core/allocator/heap_allocator_aligned.hh"
 #include "core/allocator/i_allocator.hh"
+#include "memory_chunk.hh"
 #include "utils/defs.hh"
 #include <cstddef>
 #include <cstdint>
@@ -51,7 +52,7 @@ struct AllocatorTrait<class HeapAllocatorAlignedPoolImplicitList> final : public
  */
 class HeapAllocatorAlignedPoolImplicitList final : public HeapAllocatorAligned {
 public:
-    HeapAllocatorAlignedPoolImplicitList() : HeapAllocatorAlignedPoolImplicitList(WBE_KiB(64)) {
+    HeapAllocatorAlignedPoolImplicitList() : HeapAllocatorAlignedPoolImplicitList(WBE_KI_B(64)) {
     }
     virtual ~HeapAllocatorAlignedPoolImplicitList() override;
     HeapAllocatorAlignedPoolImplicitList(const HeapAllocatorAlignedPoolImplicitList&) = delete;
@@ -78,6 +79,15 @@ public:
      */
     HeapAllocatorAlignedPoolImplicitList(size_t p_size);
 
+    /**
+     * @brief Constructor using a range inside a memory chunk.
+     *
+     * @param p_memory_chunk The memory chunk to reference.
+     * @param p_start_offset The pool start offset in the memory chunk.
+     * @param p_size The size occupied by this pool.
+     */
+    HeapAllocatorAlignedPoolImplicitList(MemoryChunk p_memory_chunk, size_t p_start_offset, size_t p_size);
+
     virtual MemID allocate(size_t p_size, size_t p_alignment = HEADER_SIZE) override;
 
     virtual void deallocate(MemID p_mem) override;
@@ -88,6 +98,13 @@ public:
             return nullptr;
         }
         WBE_DEBUG_ASSERT(is_in_pool(p_id));
+        return reinterpret_cast<void*>(p_id);
+    }
+
+    virtual void* try_get(MemID p_id) const override {
+        if (p_id == MEM_NULL) {
+            return nullptr;
+        }
         return reinterpret_cast<void*>(p_id);
     }
 
@@ -145,6 +162,7 @@ public:
     void check_broken() const;
 
 private:
+    MemoryChunk memory_chunk;
     size_t size;
     char* mem_chunk;
     mutable char* possible_valid;

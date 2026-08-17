@@ -33,15 +33,18 @@
 
 namespace WhiteBirdEngine {
 
-HeapAllocatorAtomicSharedMutexAlignedPool::HeapAllocatorAtomicSharedMutexAlignedPool(size_t p_size) : size(p_size) {
+HeapAllocatorAtomicSharedMutexAlignedPool::HeapAllocatorAtomicSharedMutexAlignedPool(size_t p_size)
+    : HeapAllocatorAtomicSharedMutexAlignedPool(MemoryChunk(p_size, HEADER_SIZE), 0, p_size) {
+}
+
+HeapAllocatorAtomicSharedMutexAlignedPool::HeapAllocatorAtomicSharedMutexAlignedPool(
+    MemoryChunk p_memory_chunk, size_t p_start_offset, size_t p_size)
+    : memory_chunk(std::move(p_memory_chunk)), size(p_size) {
     if (p_size > MAX_TOTAL_SIZE) {
         throw std::runtime_error("Failed to create pool: size: " + std::to_string(p_size) +
                                  " exceeds maximum: " + std::to_string(MAX_TOTAL_SIZE) + ".");
     }
-    mem_chunk = static_cast<char*>(malloc(p_size)); // NOLINT
-    if (mem_chunk == nullptr) {
-        throw std::runtime_error("Failed to create pool: malloc failed.");
-    }
+    mem_chunk = memory_chunk.get_occupied_start(p_start_offset, p_size);
     idle_list_head = std::make_unique<IdleListNode>();
     idle_list_head->size = p_size;
     idle_list_head->next = nullptr;
@@ -53,7 +56,6 @@ HeapAllocatorAtomicSharedMutexAlignedPool::~HeapAllocatorAtomicSharedMutexAligne
     if (!is_empty_unguarded()) {
         stdout_log(WBE_CHANNEL_GLOBAL)->warning("Non-empty allocator destructed.");
     }
-    free(mem_chunk); // NOLINT
     mem_chunk = nullptr;
 }
 
@@ -152,7 +154,8 @@ void* HeapAllocatorAtomicSharedMutexAlignedPool::acquire_memory(std::unique_ptr<
     return p_mem_start;
 }
 
-void HeapAllocatorAtomicSharedMutexAlignedPool::insert_free_memory(IdleListNode* p_node_before_insert, char* p_insert_start, size_t p_insert_size) {
+void HeapAllocatorAtomicSharedMutexAlignedPool::insert_free_memory(
+    IdleListNode* p_node_before_insert, char* p_insert_start, size_t p_insert_size) {
     if (idle_list_head == nullptr) {
         idle_list_head = std::make_unique<IdleListNode>();
         ++idle_chunks_count;
@@ -192,7 +195,8 @@ bool HeapAllocatorAtomicSharedMutexAlignedPool::combine_idle_with_next(IdleListN
     return true;
 }
 
-std::unique_ptr<HeapAllocatorAtomicSharedMutexAlignedPool::IdleListNode>& HeapAllocatorAtomicSharedMutexAlignedPool::get_idle_node_before(void* p_loc) {
+std::unique_ptr<HeapAllocatorAtomicSharedMutexAlignedPool::IdleListNode>& HeapAllocatorAtomicSharedMutexAlignedPool::get_idle_node_before(
+    void* p_loc) {
     std::unique_ptr<IdleListNode>* curr = &idle_list_head;
     while (curr != nullptr) {
         if ((*curr)->next == nullptr || (*curr)->next->mem_start > p_loc) {

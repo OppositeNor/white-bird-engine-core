@@ -14,8 +14,8 @@
 */
 #include "global/global.hh"
 #include "core/engine_core.hh"
-#include "core/memory/unique.hh"
 #include "platform/file_system/directory.hh"
+#include <cstdint>
 
 namespace WhiteBirdEngine {
 

@@ -17,7 +17,6 @@
 
 #include "platform/file_system/directory.hh"
 #include "platform/file_system/path.hh"
-#include "utils/defs.hh"
 #include "utils/interface/i_singleton.hh"
 #include <string>
 #include <string_view>
@@ -32,7 +31,10 @@ class FileSystem final : public ISingleton<FileSystem> {
 public:
     FileSystem();
     ~FileSystem();
-    WBE_R6_NDCD_DELETE_COPY_MOVE(FileSystem)
+    FileSystem(const FileSystem&) = delete;
+    FileSystem(FileSystem&&) noexcept = delete;
+    FileSystem& operator=(const FileSystem&) = delete;
+    FileSystem& operator=(FileSystem&&) noexcept = delete;
 
     /**
      * @brief Constructor.

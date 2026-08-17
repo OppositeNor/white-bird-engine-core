@@ -16,12 +16,16 @@
 #define WBE_FILE_STACK_ALLOCATOR_HH
 
 #include "i_allocator.hh"
+#include "memory_chunk.hh"
 #include "utils/defs.hh"
 #include "utils/utils.hh"
 #include <cstddef>
-#include <memory>
+#include <cstring>
+#include <format>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace WhiteBirdEngine {
 
@@ -61,7 +65,20 @@ public:
      *
      * @param p_size The size of the allocated buffer in bytes.
      */
-    StackAllocator(size_t p_size) : total_size(p_size), stack_pointer(0), mem_chunk(std::make_unique<char[]>(total_size)) {
+    StackAllocator(size_t p_size) : StackAllocator(MemoryChunk(p_size), 0, p_size) {
+    }
+
+    /**
+     * @brief Constructor using a range inside a memory chunk.
+     *
+     * @param p_memory_chunk The memory chunk to reference.
+     * @param p_start_offset The stack start offset in the memory chunk.
+     * @param p_size The size occupied by this stack.
+     */
+    StackAllocator(MemoryChunk p_memory_chunk, size_t p_start_offset, size_t p_size)
+        : total_size(p_size), stack_pointer(0), memory_chunk(std::move(p_memory_chunk)) {
+        mem_chunk = memory_chunk.get_occupied_start(p_start_offset, p_size);
+        std::memset(mem_chunk, 0, p_size);
     }
 
     /**
@@ -71,8 +88,15 @@ public:
      * @return
      */
     MemID allocate(size_t p_size) {
-        void* result = mem_chunk.get() + stack_pointer;
+        void* result = mem_chunk + stack_pointer;
         stack_pointer += get_align_size(p_size, WBE_DEFAULT_ALIGNMENT);
+        if (stack_pointer > total_size) {
+            // Decrease it back or else operator std::string is going to output weird numbers.
+            stack_pointer -= get_align_size(p_size, WBE_DEFAULT_ALIGNMENT);
+            throw std::runtime_error(std::format("Failed to allocate memory: not enough space.\nTrying to allocate: {} bytes.\nPool status: {}",
+                p_size,
+                static_cast<std::string>(*this)));
+        }
         return reinterpret_cast<MemID>(result);
     }
 
@@ -85,8 +109,8 @@ public:
         if (p_id == MEM_NULL) {
             return nullptr;
         }
-        WBE_DEBUG_ASSERT(reinterpret_cast<void*>(p_id) >= mem_chunk.get());
-        WBE_DEBUG_ASSERT(reinterpret_cast<void*>(p_id) <= (mem_chunk.get() + stack_pointer));
+        WBE_DEBUG_ASSERT(reinterpret_cast<void*>(p_id) >= mem_chunk);
+        WBE_DEBUG_ASSERT(reinterpret_cast<void*>(p_id) <= (mem_chunk + stack_pointer));
         return reinterpret_cast<void*>(p_id);
     }
 
@@ -96,7 +120,7 @@ public:
      * @param p_id The ID of the memory to get.
      */
     virtual void* get(MemID p_id) const override {
-        WBE_DEBUG_ASSERT(reinterpret_cast<void*>(p_id) < (mem_chunk.get() + stack_pointer));
+        WBE_DEBUG_ASSERT(reinterpret_cast<void*>(p_id) < (mem_chunk + stack_pointer));
         return reinterpret_cast<void*>(p_id);
     }
 
@@ -109,7 +133,7 @@ public:
      */
     template <typename T>
     T* get_obj(MemID p_id) const {
-        WBE_DEBUG_ASSERT(reinterpret_cast<void*>(p_id) < (mem_chunk.get() + stack_pointer));
+        WBE_DEBUG_ASSERT(reinterpret_cast<void*>(p_id) < (mem_chunk + stack_pointer));
         return reinterpret_cast<T*>(p_id);
     }
 
@@ -120,7 +144,7 @@ public:
      */
     void* pop_stack(size_t p_size) {
         stack_pointer -= get_align_size(p_size, WBE_DEFAULT_ALIGNMENT);
-        return mem_chunk.get() + stack_pointer;
+        return mem_chunk + stack_pointer;
     }
 
     /**
@@ -151,14 +175,15 @@ public:
     operator std::string() const {
         std::stringstream ss;
         ss << R"({"type":"StackAllocator","total_size":)" << total_size << R"(,"stack_pointer":)" << stack_pointer
-           << R"(,"available":)" << (total_size - stack_pointer) << "}";
+           << R"(,"available":)" << total_size - stack_pointer << "}";
         return ss.str();
     }
 
 private:
     size_t total_size;
     size_t stack_pointer;
-    std::unique_ptr<char[]> mem_chunk;
+    MemoryChunk memory_chunk;
+    char* mem_chunk;
 };
 
 template <typename T, typename... Args>

@@ -1,8 +1,23 @@
+/* Copyright 2025 OppositeNor
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 #ifndef WBE_FILE_HEAP_ALLOCATOR_ATOMIC_MUTEX_ALIGNED_POOL_IMPL_LIST_HH
 #define WBE_FILE_HEAP_ALLOCATOR_ATOMIC_MUTEX_ALIGNED_POOL_IMPL_LIST_HH
 
 #include "core/allocator/heap_allocator_aligned.hh"
 #include "core/allocator/i_allocator.hh"
+#include "memory_chunk.hh"
 #ifdef _DEBUG
 #include "core/debug_utils/debug_mutex.hh"
 #else
@@ -46,7 +61,7 @@ private:
     using Header = uint64_t;
 
 public:
-    HeapAllocatorAtomicMutexAlignedPoolImplicitList() : HeapAllocatorAtomicMutexAlignedPoolImplicitList(WBE_KiB(64)) {
+    HeapAllocatorAtomicMutexAlignedPoolImplicitList() : HeapAllocatorAtomicMutexAlignedPoolImplicitList(WBE_KI_B(64)) {
     }
     virtual ~HeapAllocatorAtomicMutexAlignedPoolImplicitList() override;
     HeapAllocatorAtomicMutexAlignedPoolImplicitList(const HeapAllocatorAtomicMutexAlignedPoolImplicitList&) = delete;
@@ -71,7 +86,17 @@ public:
      */
     HeapAllocatorAtomicMutexAlignedPoolImplicitList(size_t p_size);
 
+    /**
+     * @brief Constructor using a range inside a memory chunk.
+     *
+     * @param p_memory_chunk The memory chunk to reference.
+     * @param p_start_offset The pool start offset in the memory chunk.
+     * @param p_size The size occupied by this pool.
+     */
+    HeapAllocatorAtomicMutexAlignedPoolImplicitList(MemoryChunk p_memory_chunk, size_t p_start_offset, size_t p_size);
+
     virtual MemID allocate(size_t p_size, size_t p_alignment = HEADER_SIZE) override;
+    virtual MemID try_allocate(size_t p_size, size_t p_alignment = HEADER_SIZE) override;
 
     virtual void deallocate(MemID p_mem) override;
 
@@ -80,6 +105,13 @@ public:
             return nullptr;
         }
         WBE_DEBUG_ASSERT(is_in_pool(p_id));
+        return reinterpret_cast<void*>(p_id);
+    }
+
+    virtual void* try_get(MemID p_id) const override {
+        if (p_id == MEM_NULL) {
+            return nullptr;
+        }
         return reinterpret_cast<void*>(p_id);
     }
 
@@ -147,6 +179,7 @@ public:
     }
 
 private:
+    MemoryChunk memory_chunk;
     size_t size;
     char* mem_chunk;
     mutable char* possible_valid;

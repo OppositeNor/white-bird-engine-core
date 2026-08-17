@@ -25,7 +25,6 @@
 #include "generated/type_uuid.gen.hh"
 #include "platform/file_system/directory.hh"
 #include "platform/file_system/file_system.hh"
-#include "utils/defs.hh"
 #include "utils/interface/i_singleton.hh"
 #include <cstdint>
 #include <ostream>
@@ -44,7 +43,10 @@ class EngineCore : public ISingleton<EngineCore> {
 public:
     EngineCore() = delete;
     virtual ~EngineCore() override;
-    WBE_R6_NDCD_DELETE_COPY_MOVE(EngineCore)
+    EngineCore(const EngineCore&) = delete;
+    EngineCore(EngineCore&&) noexcept = delete;
+    EngineCore& operator=(const EngineCore&) = delete;
+    EngineCore& operator=(EngineCore&&) noexcept = delete;
 
     /**
      * @brief Constructor.

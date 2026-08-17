@@ -14,8 +14,6 @@
 */
 #ifndef WBE_FILE_I_ALLOCATOR_HH
 #define WBE_FILE_I_ALLOCATOR_HH
-#include "utils/defs.hh"
-
 #include <concepts>
 #include <cstdint>
 namespace WhiteBirdEngine {
@@ -70,7 +68,12 @@ concept AllocatorTraitConcept = requires {
  */
 class IAllocator {
 public:
-    WBE_R6_DEFAULT_VIRTUAL(IAllocator)
+    IAllocator() = default;
+    virtual ~IAllocator() = default;
+    IAllocator(const IAllocator&) = default;
+    IAllocator(IAllocator&&) = default;
+    IAllocator& operator=(const IAllocator&) = default;
+    IAllocator& operator=(IAllocator&&) = default;
 
     /**
      * @brief Get the pointer pointing to the resource.
@@ -79,6 +82,16 @@ public:
      * @return The pointer of the resource.
      */
     virtual void* get(MemID p_id) const = 0;
+
+    /**
+     * @brief Try to get the pointer pointing to the resource without debug pool membership checks.
+     *
+     * @param p_id The resource id to get the pointer from.
+     * @return The pointer of the resource.
+     */
+    virtual void* try_get(MemID p_id) const {
+        return get(p_id);
+    }
 };
 
 } // namespace WhiteBirdEngine

@@ -24,8 +24,6 @@
 #include <fstream>
 #include <ios>
 #include <limits>
-#include <memory>
-#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -469,62 +467,6 @@ enum class ColorSpace {
     // SRGB space
     SRGB
 };
-
-/**
- * @brief A better name for the required field.
- *
- * @tparam T The type of the required value.
- */
-template <typename T>
-using Required = std::optional<T>; // What's optional is actually required...
-
-template <typename T>
-inline T required(std::string_view p_value_name, std::optional<T> p_optional_value) {
-    if (!p_optional_value.has_value()) {
-        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
-    }
-    return p_optional_value.value();
-}
-
-template <typename T>
-inline std::optional<T>& requires_valid(std::string_view p_value_name, std::optional<T>& p_optional_value) {
-    if (!p_optional_value.has_value()) {
-        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
-    }
-    return p_optional_value;
-}
-
-template <typename T>
-inline std::optional<T> requires_valid(std::string_view p_value_name, std::optional<T>&& p_optional_value) {
-    if (!p_optional_value.has_value()) {
-        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
-    }
-    return p_optional_value;
-}
-
-template <typename T>
-inline T* requires_valid(std::string_view p_value_name, T* p_optional_value) {
-    if (p_optional_value == nullptr) {
-        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
-    }
-    return p_optional_value;
-}
-
-template <typename T>
-inline std::shared_ptr<T> requires_valid(std::string_view p_value_name, std::shared_ptr<T> p_optional_value) {
-    if (p_optional_value == nullptr) {
-        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
-    }
-    return p_optional_value;
-}
-
-template <typename T>
-inline std::unique_ptr<T> requires_valid(std::string_view p_value_name, std::unique_ptr<T> p_optional_value) {
-    if (p_optional_value == nullptr) {
-        throw std::runtime_error(std::format("Option \"{}\" is required.", p_value_name));
-    }
-    return p_optional_value;
-}
 
 /**
  * @class BufferBase

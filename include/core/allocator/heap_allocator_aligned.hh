@@ -39,7 +39,10 @@ class HeapAllocatorAligned : public HeapAllocator {
 public:
     HeapAllocatorAligned() = default;
     virtual ~HeapAllocatorAligned() override = default;
-    WBE_R6_NDCD_DELETE_COPY_MOVE(HeapAllocatorAligned)
+    HeapAllocatorAligned(const HeapAllocatorAligned&) = delete;
+    HeapAllocatorAligned(HeapAllocatorAligned&&) noexcept = delete;
+    HeapAllocatorAligned& operator=(const HeapAllocatorAligned&) = delete;
+    HeapAllocatorAligned& operator=(HeapAllocatorAligned&&) noexcept = delete;
 
     /**
      * @brief Allocate memory of a specific size.
@@ -54,6 +57,10 @@ public:
         return allocate(p_size, WBE_DEFAULT_ALIGNMENT);
     }
 
+    virtual MemID try_allocate(size_t p_size) override {
+        return try_allocate(p_size, WBE_DEFAULT_ALIGNMENT);
+    }
+
     /**
      * @brief Allocate memory of a specific size.
      * @note If IS_ALLOC_FIXED_SIZE is true for this allocator, allocating a
@@ -65,6 +72,17 @@ public:
      * @return The memory ID of the allocated resource.
      */
     virtual MemID allocate(size_t p_size, size_t p_alignment) = 0;
+
+    /**
+     * @brief Try to allocate aligned memory of a specific size.
+     *
+     * @param p_size The size to allocate.
+     * @param p_alignment Alignment.
+     * @return The memory ID of the allocated resource, or MEM_NULL if no space is available.
+     */
+    virtual MemID try_allocate(size_t p_size, size_t p_alignment) {
+        return allocate(p_size, p_alignment);
+    }
 
     /**
      * @brief Get the size of an allocated memory.

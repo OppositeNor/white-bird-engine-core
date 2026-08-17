@@ -23,6 +23,7 @@
 #include <format>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 #define WBE_HAFSP_GET_DATA_INDEX(id) (*(index_chunk_start + (id) - 1))
 #define WBE_HAFSP_DATA_CHUNK_START (mem_chunk)
@@ -40,7 +41,6 @@ HeapAllocatorFixedSizePool::~HeapAllocatorFixedSizePool() {
     if (obj_count() != 0) {
         stdout_log(WBE_CHANNEL_GLOBAL)->warning("HeapAllocatorFixedSizePool not empty during destruction.");
     }
-    free(mem_chunk); // NOLINT
 }
 
 inline MemID HeapAllocatorFixedSizePool::allocate(size_t p_size) {

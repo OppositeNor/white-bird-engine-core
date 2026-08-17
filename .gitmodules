@@ -16,3 +16,6 @@
 [submodule "dependencies/glm"]
 	path = dependencies/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "dependencies/wbe-utils-model-compiler"]
+	path = dependencies/wbe-utils-model-compiler
+	url = https://github.com/OppositeNor/wbe-utils-model-compiler.git

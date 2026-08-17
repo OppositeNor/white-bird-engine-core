@@ -17,6 +17,7 @@
 
 #include "core/allocator/i_allocator.hh"
 #include "heap_allocator.hh"
+#include "memory_chunk.hh"
 #include "utils/defs.hh"
 #include <cstddef>
 #include <cstdint>
@@ -48,7 +49,7 @@ struct AllocatorTrait<class HeapAllocatorPool> final : public AllocatorTrait<Hea
  */
 class HeapAllocatorPool final : public HeapAllocator {
 public:
-    HeapAllocatorPool() : HeapAllocatorPool(WBE_KiB(1)) {
+    HeapAllocatorPool() : HeapAllocatorPool(WBE_KI_B(1)) {
     }
     virtual ~HeapAllocatorPool() override;
     HeapAllocatorPool(const HeapAllocatorPool&) = delete;
@@ -74,6 +75,15 @@ public:
      * @param p_size The size of the pool in bytes.
      */
     HeapAllocatorPool(size_t p_size);
+
+    /**
+     * @brief Constructor using a range inside a memory chunk.
+     *
+     * @param p_memory_chunk The memory chunk to reference.
+     * @param p_start_offset The pool start offset in the memory chunk.
+     * @param p_size The size occupied by this pool.
+     */
+    HeapAllocatorPool(MemoryChunk p_memory_chunk, size_t p_start_offset, size_t p_size);
 
     virtual MemID allocate(size_t p_size) override;
 
@@ -125,6 +135,7 @@ private:
     bool combine_idle_with_next(IdleListNode* p_node);
     std::unique_ptr<IdleListNode>& get_idle_node_before(void* p_loc);
 
+    MemoryChunk memory_chunk;
     size_t size;
     char* mem_chunk;
     uint32_t idle_chunks_count;
